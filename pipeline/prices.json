@@ -1,4 +1,145 @@
 {
-  "updated_at": "2026-04-25T20:10:48.292Z",
-  "prices": []
+  "updated_at": "2026-04-25T21:04:03.427Z",
+  "prices": [
+    {
+      "item_key": "bananas_lb",
+      "item_name": "Bananas",
+      "store": "winco",
+      "price": 0.39,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bread_white_loaf",
+      "item_name": "White sandwich bread",
+      "store": "winco",
+      "price": 1.98,
+      "unit": "loaf",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "butter_salted_lb",
+      "item_name": "Butter, salted",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "canola_oil_48oz",
+      "item_name": "Canola oil",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "48 oz",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "cheddar_cheese_lb",
+      "item_name": "Cheddar cheese",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "chicken_breast_lb",
+      "item_name": "Boneless chicken breast",
+      "store": "winco",
+      "price": 2.78,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "eggs_large_dozen",
+      "item_name": "Large eggs",
+      "store": "winco",
+      "price": 5.48,
+      "unit": "doz",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "ground_beef_8020_lb",
+      "item_name": "Ground beef 80/20",
+      "store": "winco",
+      "price": 4.48,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "milk_whole_gallon",
+      "item_name": "Whole milk",
+      "store": "winco",
+      "price": 3.18,
+      "unit": "gal",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "orange_juice_52oz",
+      "item_name": "Orange juice",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "52 oz",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "paper_towels_6pk",
+      "item_name": "Paper towels",
+      "store": "winco",
+      "price": 7.98,
+      "unit": "6-ct",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "pasta_spaghetti_16oz",
+      "item_name": "Spaghetti pasta",
+      "store": "winco",
+      "price": 0.98,
+      "unit": "16 oz",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "potatoes_russet_5lb",
+      "item_name": "Russet potatoes",
+      "store": "winco",
+      "price": 3.48,
+      "unit": "5 lb bag",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "toilet_paper_12pk",
+      "item_name": "Toilet paper",
+      "store": "winco",
+      "price": 8.98,
+      "unit": "12-ct",
+      "source": "manual",
+      "observed_at": "2026-04-25",
+      "ad_end_date": null
+    }
+  ]
 }
