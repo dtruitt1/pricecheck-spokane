@@ -41,6 +41,8 @@ jobs:
           WALMART_PRIVATE_KEY: ${{ secrets.WALMART_PRIVATE_KEY }}
           KROGER_CLIENT_ID: ${{ secrets.KROGER_CLIENT_ID }}
           KROGER_CLIENT_SECRET: ${{ secrets.KROGER_CLIENT_SECRET }}
+          SAFEWAY_EMAIL: ${{ secrets.SAFEWAY_EMAIL }}
+          SAFEWAY_PASSWORD: ${{ secrets.SAFEWAY_PASSWORD }}
           DB_PATH: ./prices.db
         run: |
           SOURCE=${{ github.event.inputs.source || 'all' }}
