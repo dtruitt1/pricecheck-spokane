@@ -2,11 +2,7 @@ name: Weekly price sync
 
 on:
   schedule:
-    # Every Sunday at 11 PM Pacific (Monday 07:00 UTC)
-    # WinCo and Fred Meyer post new weekly ads Sunday evening
     - cron: '0 7 * * 1'
-
-  # Allow manual trigger from GitHub Actions UI
   workflow_dispatch:
     inputs:
       source:
@@ -22,7 +18,7 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to commit prices.json back to repo
+      contents: write
 
     steps:
       - name: Checkout
@@ -31,21 +27,19 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: 'npm'
-          cache-dependency-path: pipeline/package-lock.json
+          node-version: '22'
 
       - name: Install dependencies
         working-directory: pipeline
-        run: npm ci
+        run: npm install
 
       - name: Run sync
         working-directory: pipeline
         env:
-          ANTHROPIC_API_KEY:    ${{ secrets.ANTHROPIC_API_KEY }}
-          WALMART_CONSUMER_ID:  ${{ secrets.WALMART_CONSUMER_ID }}
-          WALMART_PRIVATE_KEY:  ${{ secrets.WALMART_PRIVATE_KEY }}
-          DB_PATH:              ./prices.db
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          WALMART_CONSUMER_ID: ${{ secrets.WALMART_CONSUMER_ID }}
+          WALMART_PRIVATE_KEY: ${{ secrets.WALMART_PRIVATE_KEY }}
+          DB_PATH: ./prices.db
         run: |
           SOURCE=${{ github.event.inputs.source || 'all' }}
           DRY_RUN=${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
@@ -54,15 +48,8 @@ jobs:
       - name: Commit updated prices.json
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
-          git config user.name  "PriceCheck Bot"
+          git config user.name "PriceCheck Bot"
           git config user.email "pricecheck-bot@noreply"
           git add pipeline/prices.json
           git diff --staged --quiet || git commit -m "chore: weekly price sync $(date -u +%Y-%m-%d)"
           git push
-
-      - name: Upload prices.json as artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: prices-${{ github.run_id }}
-          path: pipeline/prices.json
-          retention-days: 90
