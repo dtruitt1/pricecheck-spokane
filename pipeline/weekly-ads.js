@@ -42,7 +42,7 @@ async function getKrogerToken() {
 
 async function getKrogerLocationId(token, zipCode='99206') {
   const resp = await fetch(
-    `https://api.kroger.com/v1/locations?filter.zipCode.near=${zipCode}&filter.radiusInMiles=10&filter.chain=FREDMEYER&filter.limit=1`,
+    `https://api.kroger.com/v1/locations?filter.zipCode.near=${zipCode}&filter.radiusInMiles=10&filter.chain=FRED MEYER&filter.limit=1`,
     { headers:{'Authorization':`Bearer ${token}`,'Accept':'application/json'} }
   );
   if (!resp.ok) throw new Error(`Kroger locations failed: ${resp.status}`);
