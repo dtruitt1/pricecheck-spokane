@@ -39,6 +39,8 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           WALMART_CONSUMER_ID: ${{ secrets.WALMART_CONSUMER_ID }}
           WALMART_PRIVATE_KEY: ${{ secrets.WALMART_PRIVATE_KEY }}
+          KROGER_CLIENT_ID: ${{ secrets.KROGER_CLIENT_ID }}
+          KROGER_CLIENT_SECRET: ${{ secrets.KROGER_CLIENT_SECRET }}
           DB_PATH: ./prices.db
         run: |
           SOURCE=${{ github.event.inputs.source || 'all' }}
