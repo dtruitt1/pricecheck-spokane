@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PriceCheck v3 — Spokane</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
+<style>
+:root {
+  --bg: #0e0e10; --surface: #16161a; --surface2: #1e1e24; --border: #2a2a32;
+  --accent: #b5f542; --accent2: #42f5a7; --warn: #f5c842; --danger: #f55442;
+  --text: #e8e8e0; --muted: #6b6b7a;
+  --mono: 'DM Mono', monospace; --display: 'Syne', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--display); min-height: 100vh; }
+.app { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+
+.header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 28px; }
+.logo-mark { font-family: var(--mono); font-size: 11px; background: var(--accent); color: #0e0e10; padding: 3px 8px; border-radius: 2px; font-weight: 500; letter-spacing: .05em; }
+.logo-text { font-size: 20px; font-weight: 800; letter-spacing: -.03em; }
+.sync-badge { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-left: auto; display: flex; align-items: center; gap: 5px; }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+.sync-dot.live { background: var(--accent2); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+
+.tabs { display: flex; gap: 2px; background: var(--surface); border-radius: 8px; padding: 4px; margin-bottom: 20px; }
+.tab { flex: 1; padding: 7px 6px; border: none; background: transparent; color: var(--muted); font-family: var(--display); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all .15s; }
+.tab.active { background: var(--surface2); color: var(--text); }
+.panel { display: none; } .panel.active { display: block; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+.card-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
+.input-row { display: flex; gap: 8px; }
+.input-field { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; color: var(--text); font-family: var(--display); font-size: 14px; font-weight: 600; outline: none; transition: border-color .15s; }
+.input-field:focus { border-color: var(--accent); }
+.input-field::placeholder { color: var(--muted); font-weight: 400; }
+.price-input { width: 100px; flex: none; font-family: var(--mono); font-size: 17px; }
+.unit-row { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+.unit-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; transition: all .12s; }
+.unit-chip.active, .unit-chip:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--accent); color: #0e0e10; border: none; border-radius: 8px; padding: 11px 18px; font-family: var(--display); font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+.btn-primary:hover { opacity: .85; } .btn-primary:disabled { opacity: .35; cursor: default; }
+.btn-sec { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-family: var(--display); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-sec:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Verdict */
+.verdict-card { border-radius: 12px; padding: 18px; margin-bottom: 14px; border: 1.5px solid transparent; display: none; animation: fadeUp .25s ease; }
+@keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+.verdict-card.show { display: block; }
+.verdict-card.good { background: #0b1c0b; border-color: var(--accent); }
+.verdict-card.fair { background: #1c180b; border-color: var(--warn); }
+.verdict-card.high { background: #1c0b0b; border-color: var(--danger); }
+.verdict-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.verdict-badge { font-family: var(--mono); font-size: 11px; padding: 3px 9px; border-radius: 3px; letter-spacing: .08em; flex-shrink: 0; }
+.good .verdict-badge { background: var(--accent); color: #0e0e10; }
+.fair .verdict-badge { background: var(--warn); color: #0e0e10; }
+.high .verdict-badge { background: var(--danger); color: #0e0e10; }
+.verdict-item { font-size: 14px; font-weight: 700; flex: 1; }
+.verdict-price-tag { font-family: var(--mono); font-size: 19px; }
+.verdict-analysis { font-size: 13px; line-height: 1.65; margin-bottom: 12px; opacity: .9; }
+.store-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 12px; }
+.store-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 6px; text-align: center; }
+.store-name { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
+.store-price-val { font-family: var(--mono); font-size: 15px; }
+.store-price-val.best { color: var(--accent); } .store-price-val.mid { color: var(--warn); } .store-price-val.high { color: var(--danger); }
+.store-source { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
+.bar-wrap { margin-bottom: 6px; }
+.bar-labels { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+.bar-track { height: 5px; background: var(--surface2); border-radius: 3px; position: relative; overflow: visible; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.bar-marker { position: absolute; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 2px solid var(--bg); transform: translateX(-50%); transition: left .6s cubic-bezier(.4,0,.2,1); }
+.data-source-row { font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+
+/* Loading */
+.loading { display: none; padding: 24px; text-align: center; flex-direction: column; align-items: center; gap: 10px; }
+.loading.show { display: flex; }
+.spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .65s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-steps { display: flex; flex-direction: column; gap: 3px; }
+.lstep { font-family: var(--mono); font-size: 11px; color: var(--muted); opacity: .35; transition: all .25s; }
+.lstep.active { opacity: 1; color: var(--accent2); }
+.lstep.done { opacity: .6; color: var(--accent); }
+
+/* Barcode */
+.scanner-wrap { position: relative; border-radius: 10px; overflow: hidden; background: #000; aspect-ratio: 4/3; }
+#barcode-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.scan-frame { width: 62%; aspect-ratio: 3/1; border: 2px solid var(--accent); border-radius: 4px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,.5); }
+.scan-line { position: absolute; left: 4px; right: 4px; top: 50%; height: 2px; background: var(--accent); opacity: .8; animation: scanln 2s ease-in-out infinite; }
+@keyframes scanln { 0%,100%{top:15%}50%{top:85%} }
+.scan-status { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text); background: rgba(0,0,0,.6); padding: 5px; }
+.scan-flash { position: absolute; inset: 0; background: var(--accent); opacity: 0; pointer-events: none; transition: opacity .1s; border-radius: 10px; }
+.upc-result { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px; margin-top: 10px; display: none; }
+.upc-result.show { display: block; }
+.upc-product-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+.upc-brand { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+/* Photo upload */
+.upload-zone { border: 1.5px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
+.upload-zone:hover { border-color: var(--accent); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.preview-img { max-width: 100%; border-radius: 6px; margin-top: 10px; display: none; }
+
+/* Index */
+.index-table { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.irow { display: grid; grid-template-columns: 1fr 80px 100px 78px; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+.irow:last-child { border-bottom: none; }
+.irow.head { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--surface2); }
+.irow-name { font-weight: 600; }
+.irow-unit { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.ip { font-family: var(--mono); font-size: 12px; text-align: right; }
+.ip.lo { color: var(--accent); } .ip.hi { color: var(--danger); }
+.ip.est { color: var(--muted); font-style: italic; }
+.markup-wrap { margin-top: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+.markup-title { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.mrow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mstore { font-family: var(--mono); font-size: 11px; width: 86px; color: var(--muted); }
+.mbar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; }
+.mbar-fill { height: 100%; border-radius: 3px; }
+.mpct { font-family: var(--mono); font-size: 11px; width: 40px; text-align: right; }
+
+/* History */
+.hrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
+.hrow:hover { background: var(--surface2); } .hrow:last-child { border-bottom: none; }
+.hdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.hdot.good { background: var(--accent); } .hdot.fair { background: var(--warn); } .hdot.high { background: var(--danger); }
+.hitem { flex: 1; font-weight: 600; font-size: 13px; }
+.hmeta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.hsrc { font-family: var(--mono); font-size: 9px; padding: 2px 5px; border-radius: 3px; background: var(--surface2); color: var(--muted); }
+.hprice { font-family: var(--mono); font-size: 14px; }
+
+.empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 13px; }
+.note { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.6; padding: 10px 14px; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--border); margin-top: 10px; }
+
+/* Settings */
+.settings-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.settings-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.settings-desc { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <span class="logo-mark">v3</span>
+    <span class="logo-text">PriceCheck</span>
+    <div class="sync-badge">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">loading…</span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('check',this)">Check</button>
+    <button class="tab" onclick="switchTab('barcode',this)">Barcode</button>
+    <button class="tab" onclick="switchTab('photo',this)">Photo</button>
+    <button class="tab" onclick="switchTab('index',this)">Index</button>
+    <button class="tab" onclick="switchTab('history',this)">History</button>
+  </div>
+
+  <!-- CHECK -->
+  <div class="panel active" id="tab-check">
+    <div class="card">
+      <div class="card-label">Enter item + price</div>
+      <div class="input-row">
+        <input class="input-field" id="item-name" placeholder="e.g. ground beef, 80/20" />
+        <input class="input-field price-input" id="item-price" type="number" step="0.01" min="0" placeholder="$0.00" />
+      </div>
+      <div class="unit-row">
+        <div class="card-label" style="margin:0;line-height:2.2;font-size:9px">unit:</div>
+        <span class="unit-chip active" onclick="setUnit(this,'lb')">/lb</span>
+        <span class="unit-chip" onclick="setUnit(this,'oz')">/oz</span>
+        <span class="unit-chip" onclick="setUnit(this,'each')">each</span>
+        <span class="unit-chip" onclick="setUnit(this,'gal')">/gal</span>
+        <span class="unit-chip" onclick="setUnit(this,'ct')">/ct</span>
+        <span class="unit-chip" onclick="setUnit(this,'custom')">…</span>
+      </div>
+      <div style="margin-top:8px">
+        <input class="input-field" id="item-store" placeholder="Store (optional)" style="font-size:13px" />
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn-primary" id="check-btn" onclick="runCheck()" style="width:100%">Get verdict →</button>
+      </div>
+    </div>
+    <div class="loading" id="check-loading">
+      <div class="spinner"></div>
+      <div class="loading-steps">
+        <div class="lstep" id="ls0">loading price data…</div>
+        <div class="lstep" id="ls1">comparing against Spokane market…</div>
+        <div class="lstep" id="ls2">generating verdict…</div>
+      </div>
+    </div>
+    <div class="verdict-card" id="verdict-main">
+      <div class="verdict-top">
+        <span class="verdict-badge" id="vm-badge"></span>
+        <span class="verdict-item" id="vm-item"></span>
+        <span class="verdict-price-tag" id="vm-price"></span>
+      </div>
+      <div class="verdict-analysis" id="vm-analysis"></div>
+      <div class="store-grid" id="vm-grid"></div>
+      <div class="bar-wrap">
+        <div class="bar-labels"><span id="vm-lo"></span><span>your price</span><span id="vm-hi"></span></div>
+        <div class="bar-track">
+          <div class="bar-fill" id="vm-fill" style="width:0%"></div>
+          <div class="bar-marker" id="vm-marker" style="left:0%"></div>
+        </div>
+      </div>
+      <div class="data-source-row">
+        <div class="sync-dot" id="vm-src-dot"></div>
+        <span id="vm-src-label"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARCODE -->
+  <div class="panel" id="tab-barcode">
+    <div class="card" style="padding:14px">
+      <div class="card-label">Scan barcode</div>
+      <div class="scanner-wrap">
+        <video id="barcode-video" playsinline autoplay muted></video>
+        <div class="scan-overlay"><div class="scan-frame"><div class="scan-line"></div></div></div>
+        <div class="scan-status" id="scan-status">Press start to activate camera</div>
+        <div class="scan-flash" id="scan-flash"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-primary" id="start-btn" onclick="startScanner()" style="flex:1">Start camera</button>
+        <button class="btn-sec" id="stop-btn" onclick="stopScanner()" style="display:none">Stop</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">or UPC:</span>
+        <input class="input-field" id="upc-manual" placeholder="012345678901" style="font-family:var(--mono);font-size:12px" />
+        <button class="btn-sec" onclick="lookupUPC(document.getElementById('upc-manual').value)">Look up</button>
+      </div>
+    </div>
+    <div class="upc-result" id="upc-result">
+      <div class="upc-product-name" id="upc-name"></div>
+      <div class="upc-brand" id="upc-brand"></div>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+        <input class="input-field price-input" id="upc-price" type="number" step="0.01" min="0" placeholder="$0.00" />
+        <input class="input-field" id="upc-store" placeholder="Store" style="flex:1;font-size:13px" />
+        <button class="btn-primary" onclick="runUPCCheck()">Check →</button>
+      </div>
+    </div>
+    <div class="loading" id="barcode-loading"><div class="spinner"></div><span class="lstep active" id="bl-text">looking up…</span></div>
+    <div class="verdict-card" id="verdict-barcode">
+      <div class="verdict-top">
+        <span class="verdict-badge" id="vb-badge"></span>
+        <span class="verdict-item" id="vb-item"></span>
+        <span class="verdict-price-tag" id="vb-price"></span>
+      </div>
+      <div class="verdict-analysis" id="vb-analysis"></div>
+      <div class="store-grid" id="vb-grid"></div>
+    </div>
+    <div class="note">Uses ZXing to read EAN-13, UPC-A, Code 128 barcodes. Product info from Open Food Facts (3M+ products).</div>
+  </div>
+
+  <!-- PHOTO -->
+  <div class="panel" id="tab-photo">
+    <div class="card">
+      <div class="card-label">Photo of price tag or label</div>
+      <div class="upload-zone">
+        <input type="file" accept="image/*" capture="environment" id="img-input" onchange="handleImg(this)" />
+        <div style="font-size:24px;margin-bottom:6px">📷</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px">Take photo or upload</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Price tag, shelf label, or receipt</div>
+        <img class="preview-img" id="preview-img" />
+      </div>
+      <div style="margin-top:10px">
+        <button class="btn-primary" id="photo-btn" onclick="runPhoto()" style="width:100%" disabled>Analyze →</button>
+      </div>
+    </div>
+    <div class="loading" id="photo-loading"><div class="spinner"></div><span class="lstep active">reading image…</span></div>
+    <div class="verdict-card" id="verdict-photo">
+      <div class="verdict-top">
+        <span class="verdict-badge" id="vp-badge"></span>
+        <span class="verdict-item" id="vp-item"></span>
+        <span class="verdict-price-tag" id="vp-price"></span>
+      </div>
+      <div class="verdict-analysis" id="vp-analysis"></div>
+      <div class="store-grid" id="vp-grid"></div>
+    </div>
+  </div>
+
+  <!-- INDEX -->
+  <div class="panel" id="tab-index">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
+      <div>
+        <div style="font-size:15px;font-weight:700">Spokane staples basket</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--muted)" id="index-updated">Loading…</div>
+      </div>
+    </div>
+    <div class="index-table" id="index-table"></div>
+    <div class="markup-wrap">
+      <div class="markup-title">Avg markup vs. basket median</div>
+      <div id="markup-bars"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="tab-history">
+    <div class="card" style="padding:0;overflow:hidden" id="history-list"></div>
+    <div style="margin-top:10px;text-align:right"><button class="btn-sec" onclick="clearHistory()">Clear</button></div>
+  </div>
+
+</div>
+
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+// Option A: your deployed pipeline server (Railway, Render, etc.)
+const PRICE_API_URL = localStorage.getItem('pc_api_url') || null;
+
+// Option B: raw URL to prices.json committed in your GitHub repo
+// e.g. 'https://raw.githubusercontent.com/YOU/pricecheck/main/pipeline/prices.json'
+const PRICES_JSON_URL = localStorage.getItem('pc_json_url') || null;
+
+// ── State ───────────────────────────────────────────────────────────────────
+let priceBasket = null;   // { item_key: { walmart: {price,observed_at}, winco: {...}, fredmeyer: {...} } }
+let priceLoadedAt = null;
+let selectedUnit = 'lb';
+let imgBase64 = null, imgMime = 'image/jpeg';
+let barcodeReader = null;
+let currentUPCProduct = null;
+let history = [];
+try { history = JSON.parse(localStorage.getItem('pc_history_v3') || '[]'); } catch(e){}
+
+// Fallback hardcoded estimates (used when no live data available)
+const FALLBACK = {
+  milk_whole_gallon:    { item_name:'Whole milk',           unit:'gal',     walmart:{price:3.48},fredmeyer:{price:4.29},winco:{price:3.18} },
+  eggs_large_dozen:     { item_name:'Large eggs',           unit:'doz',     walmart:{price:5.98},fredmeyer:{price:6.49},winco:{price:5.48} },
+  ground_beef_8020_lb:  { item_name:'Ground beef 80/20',    unit:'lb',      walmart:{price:4.98},fredmeyer:{price:5.99},winco:{price:4.48} },
+  chicken_breast_lb:    { item_name:'Boneless chicken',     unit:'lb',      walmart:{price:2.98},fredmeyer:{price:3.99},winco:{price:2.78} },
+  bread_white_loaf:     { item_name:'White bread',          unit:'loaf',    walmart:{price:2.28},fredmeyer:{price:3.49},winco:{price:1.98} },
+  butter_salted_lb:     { item_name:'Butter, salted',       unit:'lb',      walmart:{price:4.48},fredmeyer:{price:5.29},winco:{price:3.98} },
+  cheddar_cheese_lb:    { item_name:'Cheddar cheese',       unit:'lb',      walmart:{price:4.98},fredmeyer:{price:5.49},winco:{price:4.28} },
+  bananas_lb:           { item_name:'Bananas',              unit:'lb',      walmart:{price:0.49},fredmeyer:{price:0.59},winco:{price:0.39} },
+  potatoes_russet_5lb:  { item_name:'Russet potatoes',      unit:'5 lb bag',walmart:{price:3.98},fredmeyer:{price:4.49},winco:{price:3.48} },
+  toilet_paper_12pk:    { item_name:'Toilet paper',         unit:'12-ct',   walmart:{price:9.97},fredmeyer:{price:12.49},winco:{price:8.98}},
+  paper_towels_6pk:     { item_name:'Paper towels',         unit:'6-ct',    walmart:{price:8.97},fredmeyer:{price:11.49},winco:{price:7.98}},
+  pasta_spaghetti_16oz: { item_name:'Spaghetti pasta',      unit:'16 oz',   walmart:{price:1.28},fredmeyer:{price:1.99},winco:{price:0.98} },
+  canola_oil_48oz:      { item_name:'Canola oil',           unit:'48 oz',   walmart:{price:4.98},fredmeyer:{price:5.99},winco:{price:4.28} },
+  orange_juice_52oz:    { item_name:'Orange juice',         unit:'52 oz',   walmart:{price:4.48},fredmeyer:{price:5.29},winco:{price:3.98} },
+};
+
+// ── Price data loading ───────────────────────────────────────────────────────
+async function loadPriceData() {
+  try {
+    if (PRICE_API_URL) {
+      const r = await fetch(`${PRICE_API_URL}/api/prices`);
+      const d = await r.json();
+      priceBasket = d.basket;
+      priceLoadedAt = d.updated_at;
+      setSyncBadge(true, priceLoadedAt);
+      return;
+    }
+    if (PRICES_JSON_URL) {
+      const r = await fetch(PRICES_JSON_URL);
+      const d = await r.json();
+      // Normalize flat array → basket object
+      priceBasket = {};
+      for (const row of (d.prices || [])) {
+        if (!priceBasket[row.item_key]) priceBasket[row.item_key] = { item_name: row.item_name, unit: row.unit };
+        priceBasket[row.item_key][row.store] = { price: row.price, observed_at: row.observed_at, source: row.source };
+      }
+      priceLoadedAt = d.updated_at;
+      setSyncBadge(true, priceLoadedAt);
+      return;
+    }
+  } catch(e) {
+    console.warn('Could not load live prices:', e.message);
+  }
+  // Fall back to hardcoded estimates
+  priceBasket = FALLBACK;
+  setSyncBadge(false, null);
+}
+
+function setSyncBadge(isLive, updatedAt) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  if (isLive && updatedAt) {
+    dot.classList.add('live');
+    const d = new Date(updatedAt);
+    lbl.textContent = 'live · ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  } else {
+    dot.classList.remove('live');
+    lbl.textContent = 'estimated data';
+  }
+}
+
+// ── Basket context builder ────────────────────────────────────────────────────
+function buildBasketContext() {
+  const basket = priceBasket || FALLBACK;
+  const lines = [];
+  for (const [key, item] of Object.entries(basket)) {
+    const stores = ['walmart','fredmeyer','winco']
+      .map(s => item[s] ? `${s} $${item[s].price.toFixed(2)}` : null)
+      .filter(Boolean).join(', ');
+    if (stores) lines.push(`${item.item_name} (${item.unit}): ${stores}`);
+  }
+  return lines.join('\n');
+}
+
+function isLiveData() {
+  return priceBasket !== FALLBACK && priceLoadedAt;
+}
+
+// ── Claude verdict call ───────────────────────────────────────────────────────
+async function callClaudeVerdict(item, price, unit, store) {
+  const basketCtx = buildBasketContext();
+  const storeCtx  = store ? `User found this at: ${store}. ` : '';
+  const dataNote  = isLiveData() ? `(Price data last updated: ${priceLoadedAt})` : '(Using estimated baseline prices)';
+
+  const prompt = `You are a grocery price intelligence engine for Spokane / Colbert, WA.
+
+SPOKANE STAPLES BASKET ${dataNote}:
+${basketCtx}
+
+Store markup context:
+- WinCo: ~10-15% below median. No frills warehouse.
+- Walmart: ~0-5% above median.
+- Fred Meyer (Kroger): ~15-25% above median.
+- Rosauers: ~20-30% above median.
+
+ITEM: ${item} at $${price} per ${unit}. ${storeCtx}
+
+Respond ONLY with valid JSON, no markdown:
+{
+  "verdict": "GOOD"|"FAIR"|"HIGH",
+  "verdict_class": "good"|"fair"|"high",
+  "analysis": "2-3 sentences. Mention specific Spokane price range, which store is cheapest for this item, and whether the user should buy now or look elsewhere.",
+  "store_prices": [
+    {"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},
+    {"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},
+    {"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"}
+  ],
+  "range_low": 0.00,
+  "range_high": 0.00,
+  "your_price_pct": 0
+}`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  const text = (data.content[0]?.text || '').replace(/```json|```/g,'').trim();
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('No JSON in response');
+  return JSON.parse(m[0]);
+}
+
+// ── Render verdict ────────────────────────────────────────────────────────────
+function renderVerdict(cardId, result, item, price, unit) {
+  const card = document.getElementById(cardId);
+  card.className = 'verdict-card show ' + result.verdict_class;
+  const p = { 'verdict-main':'vm', 'verdict-barcode':'vb', 'verdict-photo':'vp' }[cardId];
+  document.getElementById(p+'-badge').textContent = result.verdict;
+  document.getElementById(p+'-item').textContent = item;
+  document.getElementById(p+'-price').textContent = '$'+parseFloat(price).toFixed(2)+' / '+unit;
+  document.getElementById(p+'-analysis').textContent = result.analysis;
+  document.getElementById(p+'-grid').innerHTML = (result.store_prices||[]).map(s=>
+    `<div class="store-pill">
+      <div class="store-name">${s.store}</div>
+      <div class="store-price-val ${s.tier}">${s.price}</div>
+      <div class="store-source">${s.source||'est.'}</div>
+    </div>`
+  ).join('');
+  if (cardId === 'verdict-main') {
+    const pct = Math.max(2, Math.min(98, result.your_price_pct||50));
+    const col = result.verdict_class==='good'?'var(--accent)':result.verdict_class==='fair'?'var(--warn)':'var(--danger)';
+    document.getElementById('vm-lo').textContent = '$'+(result.range_low||0).toFixed(2);
+    document.getElementById('vm-hi').textContent = '$'+(result.range_high||0).toFixed(2);
+    setTimeout(()=>{
+      document.getElementById('vm-fill').style.cssText = `width:${pct}%;background:${col}`;
+      document.getElementById('vm-marker').style.left = pct+'%';
+    }, 100);
+    const live = isLiveData();
+    document.getElementById('vm-src-dot').className = 'sync-dot'+(live?' live':'');
+    document.getElementById('vm-src-label').textContent = live ? 'live price data · '+new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'estimated baseline';
+  }
+}
+
+function saveHistory(item, price, unit, store, result, src) {
+  history.unshift({ item, price, unit, store:store||'—', verdict:result.verdict, verdict_class:result.verdict_class, analysis:result.analysis, source:src||'manual', date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) });
+  if (history.length>100) history=history.slice(0,100);
+  try{ localStorage.setItem('pc_history_v3',JSON.stringify(history)); }catch(e){}
+}
+
+// ── Steps helper ─────────────────────────────────────────────────────────────
+function setStep(n) {
+  ['ls0','ls1','ls2'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.className='lstep'+(i<n?' done':i===n?' active':'');
+  });
+}
+
+// ── Manual check ──────────────────────────────────────────────────────────────
+async function runCheck() {
+  const item  = document.getElementById('item-name').value.trim();
+  const price = parseFloat(document.getElementById('item-price').value);
+  const store = document.getElementById('item-store').value.trim();
+  if (!item || isNaN(price) || price<=0) { alert('Enter item name and price.'); return; }
+  document.getElementById('verdict-main').classList.remove('show');
+  document.getElementById('check-loading').classList.add('show');
+  document.getElementById('check-btn').disabled = true;
+  setStep(0); setTimeout(()=>setStep(1),700); setTimeout(()=>setStep(2),1800);
+  try {
+    const result = await callClaudeVerdict(item, price, selectedUnit, store);
+    document.getElementById('check-loading').classList.remove('show');
+    renderVerdict('verdict-main', result, item, price, selectedUnit);
+    saveHistory(item, price, selectedUnit, store, result, 'manual');
+  } catch(e) {
+    document.getElementById('check-loading').classList.remove('show');
+    alert('Error: '+e.message);
+  }
+  document.getElementById('check-btn').disabled = false;
+}
+
+// ── Barcode ───────────────────────────────────────────────────────────────────
+async function startScanner() {
+  document.getElementById('scan-status').textContent = 'Starting camera…';
+  document.getElementById('start-btn').style.display = 'none';
+  document.getElementById('stop-btn').style.display = 'block';
+  try {
+    const hints = new Map();
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.CODE_128]);
+    barcodeReader = new ZXing.BrowserMultiFormatReader(hints);
+    await barcodeReader.decodeFromVideoDevice(undefined, document.getElementById('barcode-video'), async(result,err)=>{
+      if (!result) return;
+      const flash = document.getElementById('scan-flash');
+      flash.style.opacity='.5'; setTimeout(()=>flash.style.opacity='0',200);
+      document.getElementById('scan-status').textContent = 'Found: '+result.getText();
+      stopScanner();
+      await lookupUPC(result.getText());
+    });
+    document.getElementById('scan-status').textContent = 'Point at a barcode…';
+  } catch(e) {
+    document.getElementById('scan-status').textContent = 'Camera error: '+e.message;
+    document.getElementById('start-btn').style.display = 'block';
+    document.getElementById('stop-btn').style.display = 'none';
+  }
+}
+function stopScanner() {
+  if (barcodeReader) { try{barcodeReader.reset();}catch(e){} barcodeReader=null; }
+  document.getElementById('start-btn').style.display='block';
+  document.getElementById('stop-btn').style.display='none';
+}
+async function lookupUPC(upc) {
+  if (!upc||upc.length<8){alert('Enter a valid UPC.');return;}
+  document.getElementById('upc-result').classList.remove('show');
+  document.getElementById('verdict-barcode').classList.remove('show');
+  document.getElementById('barcode-loading').classList.add('show');
+  document.getElementById('bl-text').textContent='looking up '+upc+'…';
+  try {
+    const r = await fetch(`https://world.openfoodfacts.org/api/v3/product/${upc}.json`);
+    const d = await r.json();
+    let name='',brand='',size='';
+    if (d.status==='success'&&d.product){
+      const p=d.product; name=p.product_name_en||p.product_name||''; brand=p.brands||''; size=p.quantity||'';
+    }
+    if (!name) name='UPC '+upc;
+    currentUPCProduct={ upc, name, brand, size };
+    document.getElementById('upc-name').textContent = name||'Unknown product';
+    document.getElementById('upc-brand').textContent = [brand,size].filter(Boolean).join(' · ')||'Unknown brand';
+    document.getElementById('upc-result').classList.add('show');
+  } catch(e) { alert('Lookup error: '+e.message); }
+  document.getElementById('barcode-loading').classList.remove('show');
+}
+async function runUPCCheck() {
+  if (!currentUPCProduct) return;
+  const price = parseFloat(document.getElementById('upc-price').value);
+  const store = document.getElementById('upc-store').value.trim();
+  if (isNaN(price)||price<=0){alert('Enter the shelf price.');return;}
+  document.getElementById('verdict-barcode').classList.remove('show');
+  document.getElementById('barcode-loading').classList.add('show');
+  document.getElementById('bl-text').textContent='analyzing price…';
+  const item=[currentUPCProduct.brand,currentUPCProduct.name].filter(Boolean).join(' ');
+  const unit=currentUPCProduct.size||'each';
+  try {
+    const result = await callClaudeVerdict(item, price, unit, store);
+    document.getElementById('barcode-loading').classList.remove('show');
+    renderVerdict('verdict-barcode', result, item, price, unit);
+    saveHistory(item, price, unit, store, result, 'barcode');
+  } catch(e) { document.getElementById('barcode-loading').classList.remove('show'); alert('Error: '+e.message); }
+}
+
+// ── Photo ─────────────────────────────────────────────────────────────────────
+function handleImg(input) {
+  const file=input.files[0]; if(!file)return;
+  imgMime=file.type||'image/jpeg';
+  const r=new FileReader();
+  r.onload=e=>{
+    imgBase64=e.target.result.split(',')[1];
+    document.getElementById('preview-img').src=e.target.result;
+    document.getElementById('preview-img').style.display='block';
+    document.getElementById('photo-btn').disabled=false;
+  };
+  r.readAsDataURL(file);
+}
+async function runPhoto() {
+  if (!imgBase64) return;
+  document.getElementById('verdict-photo').classList.remove('show');
+  document.getElementById('photo-loading').classList.add('show');
+  document.getElementById('photo-btn').disabled=true;
+  const basketCtx=buildBasketContext();
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',max_tokens:1500,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:imgMime,data:imgBase64}},
+          {type:'text',text:`Grocery price intelligence for Spokane, WA. Read this image (price tag, shelf label, receipt).
+
+SPOKANE STAPLES:
+${basketCtx}
+
+Extract item/price/unit from the image. Return ONLY JSON:
+{"item":"...","price":0.00,"unit":"lb|oz|each|gal","verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences for Spokane area.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}`}
+        ]}]
+      })
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const text=(data.content[0]?.text||'').replace(/```json|```/g,'').trim();
+    const m=text.match(/\{[\s\S]*\}/); if(!m)throw new Error('No JSON');
+    const result=JSON.parse(m[0]);
+    document.getElementById('photo-loading').classList.remove('show');
+    renderVerdict('verdict-photo',result,result.item,result.price,result.unit);
+    saveHistory(result.item,result.price,result.unit,'photo',result,'photo');
+  } catch(e){ document.getElementById('photo-loading').classList.remove('show'); alert('Error: '+e.message); }
+  document.getElementById('photo-btn').disabled=false;
+}
+
+// ── Index tab ─────────────────────────────────────────────────────────────────
+function renderIndex() {
+  const basket=priceBasket||FALLBACK;
+  const updated = priceLoadedAt ? new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'Estimated baseline';
+  document.getElementById('index-updated').textContent = isLiveData() ? 'Live data · '+updated : 'Estimated baseline · configure API URL in settings to enable live data';
+  const rows=Object.entries(basket).map(([key,item])=>{
+    const stores=['walmart','fredmeyer','winco'];
+    const prices=stores.map(s=>item[s]?.price).filter(Boolean);
+    if (!prices.length) return '';
+    const lo=Math.min(...prices), hi=Math.max(...prices);
+    return `<div class="irow">
+      <div><div class="irow-name">${item.item_name}</div><div class="irow-unit">${item.unit}</div></div>
+      ${stores.map(s=>{
+        if (!item[s]) return `<div class="ip est">—</div>`;
+        const p=item[s].price, cls=p===lo?'lo':p===hi?'hi':'';
+        return `<div class="ip ${cls}">$${p.toFixed(2)}</div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  document.getElementById('index-table').innerHTML=`<div class="irow head"><div>Item</div><div style="text-align:right">Walmart</div><div style="text-align:right">Fred Meyer</div><div style="text-align:right">WinCo</div></div>`+rows;
+
+  // Markup bars
+  const totals={WinCo:0,Walmart:0,'Fred Meyer':0}; let n=0;
+  Object.values(basket).forEach(item=>{
+    const prices=[item.walmart?.price,item.fredmeyer?.price,item.winco?.price].filter(Boolean);
+    if(prices.length<2)return;
+    const med=prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)];
+    if(item.winco?.price)    totals['WinCo']       +=(item.winco.price-med)/med*100;
+    if(item.walmart?.price)  totals['Walmart']     +=(item.walmart.price-med)/med*100;
+    if(item.fredmeyer?.price)totals['Fred Meyer']  +=(item.fredmeyer.price-med)/med*100;
+    n++;
+  });
+  if(n>0) Object.keys(totals).forEach(k=>totals[k]=totals[k]/n);
+  const colors={WinCo:'var(--accent2)',Walmart:'var(--accent)','Fred Meyer':'var(--warn)'};
+  document.getElementById('markup-bars').innerHTML=Object.entries(totals).map(([store,pct])=>`
+    <div class="mrow">
+      <div class="mstore">${store}</div>
+      <div class="markup-bar-wrap" style="flex:1"><div class="mbar-track"><div class="mbar-fill" style="width:${Math.max(2,Math.min(100,(pct+20)/50*100))}%;background:${colors[store]}"></div></div></div>
+      <div class="mpct" style="color:${colors[store]}">${pct>=0?'+':''}${pct.toFixed(0)}%</div>
+    </div>`).join('');
+}
+
+// ── History tab ───────────────────────────────────────────────────────────────
+function renderHistory() {
+  const list=document.getElementById('history-list');
+  if(!history.length){list.innerHTML='<div class="empty">No checks yet.</div>';return;}
+  list.innerHTML=history.map(h=>`
+    <div class="hrow">
+      <div class="hdot ${h.verdict_class}"></div>
+      <div class="hitem">${h.item}</div>
+      <div class="hmeta">${h.store} · ${h.unit} · ${h.date}</div>
+      <span class="hsrc">${h.source}</span>
+      <div class="hprice">$${parseFloat(h.price).toFixed(2)}</div>
+    </div>`).join('');
+}
+function clearHistory(){if(confirm('Clear all history?')){history=[];try{localStorage.removeItem('pc_history_v3');}catch(e){}renderHistory();}}
+
+// ── Tab switching ──────────────────────────────────────────────────────────────
+function switchTab(t,btn){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('tab-'+t).classList.add('active');
+  if(t==='index')renderIndex();
+  if(t==='history')renderHistory();
+  if(t!=='barcode')stopScanner();
+}
+function setUnit(el,u){
+  document.querySelectorAll('.unit-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active'); selectedUnit=u;
+  if(u==='custom'){const c=prompt('Unit:');if(c){selectedUnit=c;el.textContent=c;}}
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+loadPriceData().then(()=>{ if(document.getElementById('tab-index').classList.contains('active'))renderIndex(); });
+renderHistory();
+</script>
+</body>
+</html>
