@@ -40,16 +40,18 @@ async function getKrogerToken() {
   return (await resp.json()).access_token;
 }
 
-async function getKrogerLocationId(token, zipCode='99206') {
+async function getKrogerLocationId(token) {
   const resp = await fetch(
-    `https://api.kroger.com/v1/locations?filter.zipCode.near=${zipCode}&filter.radiusInMiles=10&filter.chain=FRED MEYER&filter.limit=1`,
+    'https://api.kroger.com/v1/locations?filter.zipCode.near=99218&filter.radiusInMiles=15&filter.limit=5',
     { headers:{'Authorization':`Bearer ${token}`,'Accept':'application/json'} }
   );
   if (!resp.ok) throw new Error(`Kroger locations failed: ${resp.status}`);
   const locs = (await resp.json()).data || [];
-  if (!locs.length) throw new Error('No Fred Meyer found near 99206');
-  console.log(`  [fredmeyer] Store: ${locs[0].name} (${locs[0].locationId})`);
-  return locs[0].locationId;
+  console.log(`  [fredmeyer] Stores near 99218:`, locs.map(l=>`${l.name}(${l.locationId})`).join(', '));
+  const fm = locs.find(l => l.name?.toLowerCase().includes('fred') || l.chain?.toLowerCase().includes('fred'));
+  if (!fm) throw new Error(`No Fred Meyer found. Got: ${locs.map(l=>l.name).join(', ')}`);
+  console.log(`  [fredmeyer] Using: ${fm.name} (${fm.locationId})`);
+  return fm.locationId;
 }
 
 async function searchKrogerProduct(token, locationId, query) {
@@ -73,7 +75,7 @@ export async function fetchFredMeyerAdPrices() {
   const errors = [], results = [], today = new Date().toISOString().split('T')[0];
   try {
     const token = await getKrogerToken();
-    if (!token) { console.warn('[fredmeyer] No Kroger credentials — skipping.'); return { results:[], errors:['No credentials'] }; }
+    if (!token) { console.warn('[fredmeyer] No Kroger credentials.'); return { results:[], errors:['No credentials'] }; }
     const locationId = await getKrogerLocationId(token);
     await new Promise(r => setTimeout(r, 500));
     for (const staple of STAPLES) {
@@ -95,38 +97,50 @@ export async function fetchFredMeyerAdPrices() {
   return { results, errors };
 }
 
-// ── Safeway / Albertsons API ──────────────────────────────────────────────────
+// ── Safeway/Albertsons via Okta auth ──────────────────────────────────────────
+// Safeway uses Okta for identity. The Okta app ID for Safeway is ausp6soxrIyPrm8rS2p6.
+// This uses the Resource Owner Password flow which works for programmatic access.
 
-const SAFEWAY_SUB_KEY = 'e914eec9432c4476b79a1c35c84b6491';
-
-async function getSafewayToken(email, password) {
-  const resp = await fetch('https://www.safeway.com/abs/pub/xapi/account/login', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','ocp-apim-subscription-key':SAFEWAY_SUB_KEY},
-    body:JSON.stringify({ email, password }),
+async function getSafewayOktaToken(email, password) {
+  const resp = await fetch('https://albertsons.okta.com/oauth2/ausp6soxrIyPrm8rS2p6/v1/token', {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'Authorization': 'Basic YW5kcm9pZC1zYWZld2F5LWN1c3RvbWVyOg==', // public app client creds
+    },
+    body: new URLSearchParams({
+      username: email,
+      password: password,
+      grant_type: 'password',
+      scope: 'openid profile offline_access',
+    }).toString(),
   });
-  if (!resp.ok) throw new Error(`Safeway auth failed: ${resp.status}`);
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`Safeway Okta auth failed: ${resp.status} ${text.slice(0,100)}`);
+  }
   const data = await resp.json();
-  return data.token || data.access_token || data.jwt;
+  return data.access_token;
 }
 
-async function getSafewayStoreId(token) {
+async function getSafewayStoreId(token, zip = '99206') {
   const resp = await fetch(
-    `https://www.safeway.com/abs/pub/xapi/storelocator/homepagedefault?zipcode=99206&radius=10&limit=1`,
-    { headers:{'Authorization':`Bearer ${token}`,'ocp-apim-subscription-key':SAFEWAY_SUB_KEY,'Accept':'application/json'} }
+    `https://www.safeway.com/abs/pub/xapi/storelocator/homepagedefault?zipcode=${zip}&radius=10&limit=1`,
+    { headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' } }
   );
-  if (!resp.ok) throw new Error(`Safeway store search ${resp.status}`);
+  if (!resp.ok) throw new Error(`Safeway store lookup failed: ${resp.status}`);
   const data = await resp.json();
   const stores = data.stores || data.data || [];
-  if (!stores.length) throw new Error('No Safeway found near 99206');
-  console.log(`  [safeway] Store: ${stores[0].name} (${stores[0].storeId || stores[0].id})`);
+  if (!stores.length) throw new Error(`No Safeway near ${zip}`);
+  console.log(`  [safeway] Store: ${stores[0].name} (${stores[0].storeId||stores[0].id})`);
   return stores[0].storeId || stores[0].id;
 }
 
 async function searchSafewayProduct(token, storeId, query) {
   const url = `https://www.safeway.com/abs/pub/xapi/pgmstoredtls/api/search?request-id=1&q=${encodeURIComponent(query)}&rows=5&store-id=${storeId}&dvid=web&channel=instore`;
   const resp = await fetch(url, {
-    headers:{'Authorization':`Bearer ${token}`,'ocp-apim-subscription-key':SAFEWAY_SUB_KEY,'Accept':'application/json'}
+    headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
   });
   if (!resp.ok) throw new Error(`Safeway search failed: ${resp.status}`);
   const data = await resp.json();
@@ -141,11 +155,17 @@ function extractSafewayPrice(item) {
   return null;
 }
 
-async function fetchSafewayAlbertsons(storeName, email, password) {
-  console.log(`[${storeName}] Fetching via Safeway/Albertsons API...`);
+async function fetchSafewayAlbertsons(storeName) {
+  const email    = process.env.SAFEWAY_EMAIL;
+  const password = process.env.SAFEWAY_PASSWORD;
+  if (!email || !password) {
+    console.warn(`[${storeName}] No credentials — skipping`);
+    return { results:[], errors:['No credentials'] };
+  }
+  console.log(`[${storeName}] Fetching via Safeway Okta API...`);
   const errors = [], results = [], today = new Date().toISOString().split('T')[0];
   try {
-    const token   = await getSafewayToken(email, password);
+    const token   = await getSafewayOktaToken(email, password);
     const storeId = await getSafewayStoreId(token);
     await new Promise(r => setTimeout(r, 500));
     for (const staple of STAPLES) {
@@ -158,7 +178,7 @@ async function fetchSafewayAlbertsons(storeName, email, password) {
         if (!prices.length) continue;
         const price = Math.min(...prices);
         results.push({ item_key:staple.item_key, item_name:staple.item_name, store:storeName,
-          price, unit:staple.unit, source:'walmart_api', observed_at:today, ad_end_date:null, notes:'safeway api' });
+          price, unit:staple.unit, source:'walmart_api', observed_at:today, ad_end_date:null, notes:'safeway okta api' });
         console.log(`  [${storeName}] ${staple.item_name}: $${price.toFixed(2)}`);
       } catch(e) { errors.push(`${staple.item_key}: ${e.message}`); }
     }
@@ -167,40 +187,25 @@ async function fetchSafewayAlbertsons(storeName, email, password) {
   return { results, errors };
 }
 
-export async function fetchSafewayPrices() {
-  const email    = process.env.SAFEWAY_EMAIL;
-  const password = process.env.SAFEWAY_PASSWORD;
-  if (!email || !password) {
-    console.warn('[safeway] No credentials — falling back to web search');
-    return fetchPricesViaWebSearch('safeway', 'Safeway', 'Search "Safeway weekly ad Spokane WA" on myweeklyads.net.');
-  }
-  return fetchSafewayAlbertsons('safeway', email, password);
-}
+export async function fetchSafewayPrices()    { return fetchSafewayAlbertsons('safeway'); }
+export async function fetchAlbertsonsPrices() { return fetchSafewayAlbertsons('albertsons'); }
 
-export async function fetchAlbertsonsPrices() {
-  const email    = process.env.SAFEWAY_EMAIL;
-  const password = process.env.SAFEWAY_PASSWORD;
-  if (!email || !password) {
-    console.warn('[albertsons] No credentials — falling back to web search');
-    return fetchPricesViaWebSearch('albertsons', 'Albertsons', 'Search "Albertsons weekly ad Spokane WA" on myweeklyads.net.');
-  }
-  return fetchSafewayAlbertsons('albertsons', email, password);
-}
+// ── Rosauers via web search ───────────────────────────────────────────────────
 
-// ── Generic web search (Rosauers) ─────────────────────────────────────────────
-
-async function fetchPricesViaWebSearch(storeName, storeFullName, searchHint) {
+async function fetchViaWebSearch(storeName, storeFullName, searchPrompt) {
   console.log(`[${storeName}] Web search for ${storeFullName}...`);
   const today = new Date().toISOString().split('T')[0];
   const results = [], errors = [];
   const itemList = STAPLES.map(s => `${s.item_name} (${s.unit})`).join(', ');
   try {
-    let messages = [{ role:'user', content:`${searchHint}\nFind prices for: ${itemList}\nReturn ONLY JSON array: [{"item_name":"Whole milk","price":3.99,"unit":"gal"}]. Return [] if none found.` }];
+    let messages = [{ role:'user', content:`${searchPrompt}\nFind prices for: ${itemList}\nReturn ONLY JSON array: [{"item_name":"Whole milk","price":3.99,"unit":"gal"}]. Return [] if none found.` }];
     let finalText = '[]', iters = 0;
     while (iters < 6) {
       iters++;
-      const resp = await client.messages.create({ model:'claude-haiku-4-5-20251001', max_tokens:1024,
-        tools:[{type:'web_search_20250305',name:'web_search'}], messages });
+      const resp = await client.messages.create({
+        model:'claude-haiku-4-5-20251001', max_tokens:1024,
+        tools:[{type:'web_search_20250305',name:'web_search'}], messages,
+      });
       messages.push({ role:'assistant', content:resp.content });
       if (resp.stop_reason === 'end_turn') { for (const b of resp.content) if (b.type==='text') finalText=b.text; break; }
       if (resp.stop_reason === 'tool_use') {
@@ -225,6 +230,6 @@ async function fetchPricesViaWebSearch(storeName, storeFullName, searchHint) {
 }
 
 export async function fetchRosauerspPrices() {
-  return fetchPricesViaWebSearch('rosauers', 'Rosauers',
+  return fetchViaWebSearch('rosauers', 'Rosauers',
     'Search "Rosauers weekly ad Spokane" on rosauers.com or myweeklyads.net. Local Spokane grocery chain.');
 }
