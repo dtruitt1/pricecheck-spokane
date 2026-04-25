@@ -313,7 +313,7 @@ const PRICE_API_URL = localStorage.getItem('pc_api_url') || null;
 
 // Option B: raw URL to prices.json committed in your GitHub repo
 // e.g. 'https://raw.githubusercontent.com/YOU/pricecheck/main/pipeline/prices.json'
-const PRICES_JSON_URL = localStorage.getItem('pc_json_url') || null;
+const PRICES_JSON_URL = localStorage.getItem('pc_json_url') || 'https://raw.githubusercontent.com/dtruitt1/pricecheck-spokane/main/pipeline/prices.json';
 
 // ── State ───────────────────────────────────────────────────────────────────
 let priceBasket = null;   // { item_key: { walmart: {price,observed_at}, winco: {...}, fredmeyer: {...} } }
