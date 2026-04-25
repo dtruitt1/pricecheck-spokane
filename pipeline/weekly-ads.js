@@ -1,124 +1,118 @@
 /**
- * weekly-ads.js — fetches WinCo + Fred Meyer prices via Flipp search API
+ * weekly-ads.js — uses Claude with web search to find current grocery prices
+ * in Spokane, WA for WinCo and Fred Meyer.
  *
- * Uses the Flipp backend search endpoint (backflipp.wishabi.com) which powers
- * the flipp.com app. No auth required, no PDF scraping, no bot detection.
- * Searches by item keyword + Spokane postal code, filters by store name.
+ * WinCo is not on Flipp or any ad aggregator (employee-owned, no partnerships).
+ * Fred Meyer's Flipp integration doesn't cover Spokane well.
+ * Claude's web search finds current prices from grocery comparison sites,
+ * store websites, and weekly ad aggregators like myweeklyads.net.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { STAPLES, matchItemKey } from './items.js';
+import { STAPLES } from './items.js';
 
 const client = new Anthropic();
 
-const FLIPP_SEARCH = 'https://backflipp.wishabi.com/flipp/items/search';
-const SPOKANE_ZIP  = '99201';
-
-// Store name substrings to match in Flipp results
-const STORE_MATCHERS = {
-  winco:     ['winco'],
-  fredmeyer: ['fred meyer', 'fredmeyer', 'fred'],
-};
-
-// ── Flipp search ─────────────────────────────────────────────────────────────
-
-async function flippSearch(query, postalCode = SPOKANE_ZIP) {
-  const url = `${FLIPP_SEARCH}?q=${encodeURIComponent(query)}&postal_code=${postalCode}`;
-  const resp = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
-      'Accept': 'application/json',
-      'Referer': 'https://flipp.com/',
-    }
-  });
-  if (!resp.ok) throw new Error(`Flipp API ${resp.status} for "${query}"`);
-  return resp.json();
-}
-
-function extractPrice(item) {
-  // Flipp items have current_price, sale_price, or price_text like "$3.99"
-  if (item.current_price) return parseFloat(item.current_price);
-  if (item.sale_price)    return parseFloat(item.sale_price);
-  if (item.price_text) {
-    const m = item.price_text.match(/\$?([\d.]+)/);
-    if (m) return parseFloat(m[1]);
-  }
-  return null;
-}
-
-function matchesStore(item, storeMatchers) {
-  const merchant = (item.merchant || item.store_name || '').toLowerCase();
-  return storeMatchers.some(s => merchant.includes(s));
-}
-
-// ── Main fetch per store ──────────────────────────────────────────────────────
-
-async function fetchFlippPrices(storeName) {
-  console.log(`[${storeName}] Searching Flipp for ${STAPLES.length} items...`);
-  const matchers = STORE_MATCHERS[storeName];
+async function fetchPricesViaClaude(storeName, storeFullName) {
+  console.log(`[${storeName}] Using Claude web search for ${storeFullName} Spokane prices...`);
   const today    = new Date().toISOString().split('T')[0];
   const results  = [];
   const errors   = [];
 
-  for (const staple of STAPLES) {
-    try {
-      await new Promise(r => setTimeout(r, 200)); // gentle rate limit
-      const data = await flippSearch(staple.walmart_q);
-      const items = data.items || [];
+  // Build a single prompt asking for all staples at once to minimize API calls
+  const itemList = STAPLES.map(s => `- ${s.item_name} (${s.unit})`).join('\n');
 
-      // Filter to this store
-      const storeItems = items.filter(i => matchesStore(i, matchers));
+  try {
+    const msg = await client.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+      messages: [{
+        role: 'user',
+        content: `Search for current grocery prices at ${storeFullName} in Spokane, WA (zip 99206).
 
-      if (!storeItems.length) {
-        // Try shorter alias query
-        const shortQuery = staple.aliases[0];
-        const data2 = await flippSearch(shortQuery);
-        const items2 = (data2.items || []).filter(i => matchesStore(i, matchers));
-        storeItems.push(...items2);
+Find current prices for these items:
+${itemList}
+
+Search for "${storeFullName} Spokane weekly ad prices" and similar queries.
+Use sources like myweeklyads.net, the store's own website, or grocery price comparison sites.
+
+Return ONLY a JSON array, no markdown:
+[
+  {"item_name": "Whole milk", "price": 3.18, "unit": "gal", "found": true},
+  {"item_name": "Large eggs", "price": 5.48, "unit": "doz", "found": true}
+]
+
+If you cannot find a price for an item, set "found": false and omit the price.
+Only include items where you have reasonable confidence in the price.`
+      }]
+    });
+
+    // Extract final text response (after tool use)
+    let finalText = '';
+    for (const block of msg.content) {
+      if (block.type === 'text') finalText = block.text;
+    }
+
+    // Handle multi-turn tool use
+    if (msg.stop_reason === 'tool_use') {
+      const toolResults = msg.content
+        .filter(b => b.type === 'tool_use')
+        .map(b => ({ type: 'tool_result', tool_use_id: b.id, content: 'Search completed.' }));
+
+      const msg2 = await client.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2048,
+        messages: [
+          { role: 'user', content: msg.content[0]?.text || '' },
+          { role: 'assistant', content: msg.content },
+          { role: 'user', content: toolResults }
+        ]
+      });
+      for (const block of msg2.content) {
+        if (block.type === 'text') finalText = block.text;
       }
+    }
 
-      if (!storeItems.length) {
-        console.log(`  [${storeName}] No results for: ${staple.item_name}`);
-        continue;
-      }
+    const clean = finalText.replace(/```json|```/g, '').trim();
+    const match = clean.match(/\[[\s\S]*\]/);
+    if (!match) throw new Error('No JSON array in response');
 
-      // Take lowest price among results
-      const prices = storeItems
-        .map(i => extractPrice(i))
-        .filter(p => p && p > 0 && p < 100); // sanity check
-
-      if (!prices.length) continue;
-      const price = Math.min(...prices);
+    const items = JSON.parse(match[0]);
+    for (const item of items) {
+      if (!item.found || !item.price) continue;
+      const staple = STAPLES.find(s =>
+        s.item_name.toLowerCase() === item.item_name.toLowerCase()
+      );
+      if (!staple) continue;
 
       results.push({
         item_key:    staple.item_key,
         item_name:   staple.item_name,
         store:       storeName,
-        price,
-        unit:        staple.unit,
+        price:       parseFloat(item.price),
+        unit:        item.unit || staple.unit,
         source:      'weekly_ad',
         observed_at: today,
         ad_end_date: null,
-        notes:       `flipp search: ${staple.walmart_q}`,
+        notes:       'claude web search',
       });
-
-      console.log(`  [${storeName}] ${staple.item_name}: $${price.toFixed(2)}`);
-    } catch(e) {
-      errors.push(`${staple.item_key}: ${e.message}`);
-      console.error(`  [${storeName}] Error for ${staple.item_name}:`, e.message);
+      console.log(`  [${storeName}] ${staple.item_name}: $${item.price}`);
     }
+
+    console.log(`[${storeName}] Done: ${results.length} items found`);
+  } catch(e) {
+    errors.push(e.message);
+    console.error(`[${storeName}] Error:`, e.message);
   }
 
-  console.log(`[${storeName}] Done: ${results.length} items found`);
   return { results, errors };
 }
 
-// ── Public API ────────────────────────────────────────────────────────────────
-
 export async function fetchWinCoAdPrices() {
-  return fetchFlippPrices('winco');
+  return fetchPricesViaClaude('winco', 'WinCo Foods');
 }
 
 export async function fetchFredMeyerAdPrices() {
-  return fetchFlippPrices('fredmeyer');
+  return fetchPricesViaClaude('fredmeyer', 'Fred Meyer');
 }
