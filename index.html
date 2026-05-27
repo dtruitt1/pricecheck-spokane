@@ -139,25 +139,10 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
 .settings-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .settings-desc { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 /* API Key Setup Modal */
-.setup-overlay { position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; }
-.setup-overlay.hidden { display:none; }
-.setup-modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; max-width:420px; width:100%; }
-.setup-modal h2 { font-size:18px; font-weight:800; margin-bottom:8px; }
-.setup-modal p { font-family:var(--mono); font-size:11px; color:var(--muted); margin-bottom:20px; line-height:1.6; }
-.setup-modal input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px; color:var(--text); font-family:var(--mono); font-size:13px; margin-bottom:12px; }
-.setup-modal input:focus { outline:none; border-color:var(--accent); }
 </style>
 </head>
 <body>
-<div class="setup-overlay" id="setupOverlay" style="display:none">
-  <div class="setup-modal">
-    <h2>⚡ PriceCheck Setup</h2>
-    <p>Enter your Anthropic API key to get started.<br>It's stored only on this device — never se$
-    <input type="password" id="setupKeyInput" placeholder="sk-ant-api03-..." />
-    <button class="btn-primary" style="width:100%" onclick="saveSetupKey()">Save & Continue</butt$
-  </div>
-</div>
-<div class="app" id="main-app" style="display:none">
+<div class="app">
   <div class="header">
     <span class="logo-mark">v3</span>
     <span class="logo-text">PriceCheck</span>
@@ -322,29 +307,14 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
 </div>
 
 <script>
-// First-run API key setup
 function getApiKey() {
-  return localStorage.getItem('pc_api_key') || '';
-}
-function saveSetupKey() {
-  const key = document.getElementById('setupKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) {
-    alert('Key should start with sk-ant-');
-    return;
+  let key = localStorage.getItem('pc_api_key') || '';
+  if (!key) {
+    key = prompt('Enter your Anthropic API key (sk-ant-...):') || '';
+    if (key) localStorage.setItem('pc_api_key', key);
   }
-  localStorage.setItem('pc_api_key', key);
-document.getElementById('setupOverlay').style.display = 'none';
-document.getElementById('main-app').style.display = 'block';
+  return key;
 }
-// Show modal if no key stored
-document.addEventListener('DOMContentLoaded', function() {
-  if (!getApiKey()) {
-    document.getElementById('setupOverlay').style.display = 'flex';
-    document.getElementById('main-app').style.display = 'none';
-  } else {
-    document.getElementById('main-app').style.display = 'block';
-  }
-});
 // ── Config ──────────────────────────────────────────────────────────────────
 // Option A: your deployed pipeline server (Railway, Render, etc.)
 const PRICE_API_URL = localStorage.getItem('pc_api_url') || null;
