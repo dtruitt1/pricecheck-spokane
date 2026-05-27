@@ -157,7 +157,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
     <button class="btn-primary" style="width:100%" onclick="saveSetupKey()">Save & Continue</butt$
   </div>
 </div>
-<div class="app">
+<div class="app" id="main-app" style="display:none">
 
   <div class="header">
     <span class="logo-mark">v3</span>
@@ -334,11 +334,13 @@ function saveSetupKey() {
     return;
   }
   localStorage.setItem('pc_api_key', key);
-  window.location.href = window.location.href;
+document.getElementById('setupOverlay').style.display = 'none';
+document.getElementById('main-app').style.display = 'block';
 }
 // Show modal if no key stored
 if (!getApiKey()) {
   document.getElementById('setupOverlay').style.display = 'flex';
+  document.getElementById('main-app').style.display = 'none';
 }
 // ── Config ──────────────────────────────────────────────────────────────────
 // Option A: your deployed pipeline server (Railway, Render, etc.)
