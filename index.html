@@ -330,12 +330,11 @@ function getApiKey() {
 function saveSetupKey() {
   const key = document.getElementById('setupKeyInput').value.trim();
   if (!key.startsWith('sk-ant-')) {
-    alert('That doesn\'t look right — key should start with sk-ant-');
+    alert('Key should start with sk-ant-');
     return;
   }
   localStorage.setItem('pc_api_key', key);
-document.getElementById('setupOverlay').style.display = 'none';
-location.reload();
+  window.location.href = window.location.href;
 }
 // Show modal if no key stored
 if (!getApiKey()) {
