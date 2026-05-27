@@ -338,10 +338,14 @@ document.getElementById('setupOverlay').style.display = 'none';
 document.getElementById('main-app').style.display = 'block';
 }
 // Show modal if no key stored
-if (!getApiKey()) {
-  document.getElementById('setupOverlay').style.display = 'flex';
-  document.getElementById('main-app').style.display = 'none';
-}
+document.addEventListener('DOMContentLoaded', function() {
+  if (!getApiKey()) {
+    document.getElementById('setupOverlay').style.display = 'flex';
+    document.getElementById('main-app').style.display = 'none';
+  } else {
+    document.getElementById('main-app').style.display = 'block';
+  }
+});
 // ── Config ──────────────────────────────────────────────────────────────────
 // Option A: your deployed pipeline server (Railway, Render, etc.)
 const PRICE_API_URL = localStorage.getItem('pc_api_url') || null;
