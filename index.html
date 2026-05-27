@@ -450,7 +450,7 @@ Respond ONLY with valid JSON, no markdown:
   });
   const data = await resp.json();
   if (data.error) throw new Error(data.error.message);
-  const text = (data.content[0]?.text || '').replace(/```json|```/g,'').trim();
+  const text = (data.content[0]?.text || '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').replace(/```json|```/g,'').trim();
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) throw new Error('No JSON in response');
   return JSON.parse(m[0]);
