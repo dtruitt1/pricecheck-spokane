@@ -334,11 +334,11 @@ function saveSetupKey() {
     return;
   }
   localStorage.setItem('pc_api_key', key);
-  document.getElementById('setupOverlay').classList.add('hidden');
+  document.getElementById('setupOverlay').style.display = 'none';
 }
 // Show modal if no key stored
 if (!getApiKey()) {
-  document.getElementById('setupOverlay').classList.remove('hidden');
+  document.getElementById('setupOverlay').style.display = 'flex';
 }
 // ── Config ──────────────────────────────────────────────────────────────────
 // Option A: your deployed pipeline server (Railway, Render, etc.)
