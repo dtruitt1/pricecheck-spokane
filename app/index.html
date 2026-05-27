@@ -334,7 +334,8 @@ function saveSetupKey() {
     return;
   }
   localStorage.setItem('pc_api_key', key);
-  document.getElementById('setupOverlay').style.display = 'none';
+document.getElementById('setupOverlay').style.display = 'none';
+location.reload();
 }
 // Show modal if no key stored
 if (!getApiKey()) {
