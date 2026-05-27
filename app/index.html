@@ -750,13 +750,5 @@ function setUnit(el,u){
 loadPriceData().then(()=>{ if(document.getElementById('tab-index').classList.contains('active'))renderIndex(); });
 renderHistory();
 </script>
-<div class="setup-overlay hidden" id="setupOverlay">
-  <div class="setup-modal">
-    <h2>⚡ PriceCheck Setup</h2>
-    <p>Enter your Anthropic API key to get started.<br>It's stored only on this device — never sent anywhere except Anthropic.</p>
-    <input type="password" id="setupKeyInput" placeholder="sk-ant-api03-..." />
-    <button class="btn-primary" style="width:100%" onclick="saveSetupKey()">Save & Continue</button>
-  </div>
-</div>
 </body>
 </html>
