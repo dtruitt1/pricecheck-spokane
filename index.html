@@ -308,6 +308,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
       </div>
       <div class="verdict-analysis" id="vp-analysis"></div>
       <div class="store-grid" id="vp-grid"></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic">*estimated prices based on regional market data — not verified at this store</div>
     </div>
   </div>
 
@@ -505,7 +506,7 @@ function renderVerdict(cardId, result, item, price, unit) {
     `<div class="store-pill">
       <div class="store-name">${s.store}</div>
       <div class="store-price-val ${s.tier}">${s.price}</div>
-      <div class="store-source">${s.source||'est.'}</div>
+      <div class="store-source">${s.source==='you are here' ? 'you are here' : 'estimated*'}</div>
     </div>`
   ).join('');
   if (cardId === 'verdict-main') {
