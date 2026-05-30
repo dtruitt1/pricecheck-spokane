@@ -143,6 +143,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
 </head>
 <body>
 <div class="app">
+
   <div class="header">
     <span class="logo-mark">v3</span>
     <span class="logo-text">PriceCheck</span>
@@ -621,7 +622,7 @@ async function runPhoto() {
   const basketCtx=buildBasketContext();
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json'},
+      method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',max_tokens:1500,
         messages:[{role:'user',content:[

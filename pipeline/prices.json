@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-25T08:33:59.044Z",
+  "updated_at": "2026-05-30T16:53:53.834Z",
   "prices": [
     {
       "item_key": "bananas_lb",
@@ -8,7 +8,27 @@
       "price": 0.55,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bananas_lb",
+      "item_name": "Bananas",
+      "store": "fredmeyer",
+      "price": 0.55,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bananas_lb",
+      "item_name": "Bananas",
+      "store": "fredmeyer",
+      "price": 0.55,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -18,17 +38,57 @@
       "price": 0.39,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bananas_lb",
+      "item_name": "Bananas",
+      "store": "winco",
+      "price": 0.39,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bananas_lb",
+      "item_name": "Bananas",
+      "store": "winco",
+      "price": 0.39,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "bread_white_loaf",
       "item_name": "White sandwich bread",
       "store": "fredmeyer",
-      "price": 1.99,
+      "price": 2.39,
       "unit": "loaf",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bread_white_loaf",
+      "item_name": "White sandwich bread",
+      "store": "fredmeyer",
+      "price": 2.39,
+      "unit": "loaf",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bread_white_loaf",
+      "item_name": "White sandwich bread",
+      "store": "fredmeyer",
+      "price": 2.39,
+      "unit": "loaf",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -38,17 +98,57 @@
       "price": 1.98,
       "unit": "loaf",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bread_white_loaf",
+      "item_name": "White sandwich bread",
+      "store": "winco",
+      "price": 1.98,
+      "unit": "loaf",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "bread_white_loaf",
+      "item_name": "White sandwich bread",
+      "store": "winco",
+      "price": 1.98,
+      "unit": "loaf",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "butter_salted_lb",
       "item_name": "Butter, salted",
       "store": "fredmeyer",
-      "price": 4.49,
+      "price": 3.79,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "butter_salted_lb",
+      "item_name": "Butter, salted",
+      "store": "fredmeyer",
+      "price": 3.79,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "butter_salted_lb",
+      "item_name": "Butter, salted",
+      "store": "fredmeyer",
+      "price": 3.79,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -58,7 +158,27 @@
       "price": 3.98,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "butter_salted_lb",
+      "item_name": "Butter, salted",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "butter_salted_lb",
+      "item_name": "Butter, salted",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -68,7 +188,27 @@
       "price": 4.29,
       "unit": "48 oz",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "canola_oil_48oz",
+      "item_name": "Canola oil",
+      "store": "fredmeyer",
+      "price": 4.29,
+      "unit": "48 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "canola_oil_48oz",
+      "item_name": "Canola oil",
+      "store": "fredmeyer",
+      "price": 4.29,
+      "unit": "48 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -78,17 +218,57 @@
       "price": 4.28,
       "unit": "48 oz",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "canola_oil_48oz",
+      "item_name": "Canola oil",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "48 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "canola_oil_48oz",
+      "item_name": "Canola oil",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "48 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "cheddar_cheese_lb",
       "item_name": "Cheddar cheese",
       "store": "fredmeyer",
-      "price": 2.49,
+      "price": 2.33,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "cheddar_cheese_lb",
+      "item_name": "Cheddar cheese",
+      "store": "fredmeyer",
+      "price": 2.33,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "cheddar_cheese_lb",
+      "item_name": "Cheddar cheese",
+      "store": "fredmeyer",
+      "price": 2.33,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -98,17 +278,57 @@
       "price": 4.28,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "cheddar_cheese_lb",
+      "item_name": "Cheddar cheese",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "cheddar_cheese_lb",
+      "item_name": "Cheddar cheese",
+      "store": "winco",
+      "price": 4.28,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "chicken_breast_lb",
       "item_name": "Boneless chicken breast",
       "store": "fredmeyer",
-      "price": 2.89,
+      "price": 2.49,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "chicken_breast_lb",
+      "item_name": "Boneless chicken breast",
+      "store": "fredmeyer",
+      "price": 2.49,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "chicken_breast_lb",
+      "item_name": "Boneless chicken breast",
+      "store": "fredmeyer",
+      "price": 2.49,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -118,17 +338,57 @@
       "price": 2.78,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "chicken_breast_lb",
+      "item_name": "Boneless chicken breast",
+      "store": "winco",
+      "price": 2.78,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "chicken_breast_lb",
+      "item_name": "Boneless chicken breast",
+      "store": "winco",
+      "price": 2.78,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "eggs_large_dozen",
       "item_name": "Large eggs",
       "store": "fredmeyer",
-      "price": 3.99,
+      "price": 1.59,
       "unit": "doz",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "eggs_large_dozen",
+      "item_name": "Large eggs",
+      "store": "fredmeyer",
+      "price": 1.59,
+      "unit": "doz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "eggs_large_dozen",
+      "item_name": "Large eggs",
+      "store": "fredmeyer",
+      "price": 1.59,
+      "unit": "doz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -138,7 +398,27 @@
       "price": 5.48,
       "unit": "doz",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "eggs_large_dozen",
+      "item_name": "Large eggs",
+      "store": "winco",
+      "price": 5.48,
+      "unit": "doz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "eggs_large_dozen",
+      "item_name": "Large eggs",
+      "store": "winco",
+      "price": 5.48,
+      "unit": "doz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -148,7 +428,27 @@
       "price": 8.99,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "ground_beef_8020_lb",
+      "item_name": "Ground beef 80/20",
+      "store": "fredmeyer",
+      "price": 8.99,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "ground_beef_8020_lb",
+      "item_name": "Ground beef 80/20",
+      "store": "fredmeyer",
+      "price": 8.99,
+      "unit": "lb",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -158,7 +458,27 @@
       "price": 4.48,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "ground_beef_8020_lb",
+      "item_name": "Ground beef 80/20",
+      "store": "winco",
+      "price": 4.48,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "ground_beef_8020_lb",
+      "item_name": "Ground beef 80/20",
+      "store": "winco",
+      "price": 4.48,
+      "unit": "lb",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -168,7 +488,27 @@
       "price": 2.39,
       "unit": "gal",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "milk_whole_gallon",
+      "item_name": "Whole milk",
+      "store": "fredmeyer",
+      "price": 2.39,
+      "unit": "gal",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "milk_whole_gallon",
+      "item_name": "Whole milk",
+      "store": "fredmeyer",
+      "price": 2.39,
+      "unit": "gal",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -178,17 +518,57 @@
       "price": 3.18,
       "unit": "gal",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "milk_whole_gallon",
+      "item_name": "Whole milk",
+      "store": "winco",
+      "price": 3.18,
+      "unit": "gal",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "milk_whole_gallon",
+      "item_name": "Whole milk",
+      "store": "winco",
+      "price": 3.18,
+      "unit": "gal",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "orange_juice_52oz",
       "item_name": "Orange juice",
       "store": "fredmeyer",
-      "price": 1.5,
+      "price": 1.89,
       "unit": "52 oz",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "orange_juice_52oz",
+      "item_name": "Orange juice",
+      "store": "fredmeyer",
+      "price": 1.89,
+      "unit": "52 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "orange_juice_52oz",
+      "item_name": "Orange juice",
+      "store": "fredmeyer",
+      "price": 4.69,
+      "unit": "52 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -198,7 +578,27 @@
       "price": 3.98,
       "unit": "52 oz",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "orange_juice_52oz",
+      "item_name": "Orange juice",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "52 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "orange_juice_52oz",
+      "item_name": "Orange juice",
+      "store": "winco",
+      "price": 3.98,
+      "unit": "52 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -208,7 +608,27 @@
       "price": 14.99,
       "unit": "6-ct",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "paper_towels_6pk",
+      "item_name": "Paper towels",
+      "store": "fredmeyer",
+      "price": 14.99,
+      "unit": "6-ct",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "paper_towels_6pk",
+      "item_name": "Paper towels",
+      "store": "fredmeyer",
+      "price": 14.99,
+      "unit": "6-ct",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -218,17 +638,57 @@
       "price": 7.98,
       "unit": "6-ct",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "paper_towels_6pk",
+      "item_name": "Paper towels",
+      "store": "winco",
+      "price": 7.98,
+      "unit": "6-ct",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "paper_towels_6pk",
+      "item_name": "Paper towels",
+      "store": "winco",
+      "price": 7.98,
+      "unit": "6-ct",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
       "item_key": "pasta_spaghetti_16oz",
       "item_name": "Spaghetti pasta",
       "store": "fredmeyer",
-      "price": 1,
+      "price": 1.25,
       "unit": "16 oz",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "pasta_spaghetti_16oz",
+      "item_name": "Spaghetti pasta",
+      "store": "fredmeyer",
+      "price": 1.25,
+      "unit": "16 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "pasta_spaghetti_16oz",
+      "item_name": "Spaghetti pasta",
+      "store": "fredmeyer",
+      "price": 1.25,
+      "unit": "16 oz",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -238,7 +698,27 @@
       "price": 0.98,
       "unit": "16 oz",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "pasta_spaghetti_16oz",
+      "item_name": "Spaghetti pasta",
+      "store": "winco",
+      "price": 0.98,
+      "unit": "16 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "pasta_spaghetti_16oz",
+      "item_name": "Spaghetti pasta",
+      "store": "winco",
+      "price": 0.98,
+      "unit": "16 oz",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -248,7 +728,27 @@
       "price": 0.99,
       "unit": "5 lb bag",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "potatoes_russet_5lb",
+      "item_name": "Russet potatoes",
+      "store": "fredmeyer",
+      "price": 0.99,
+      "unit": "5 lb bag",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "potatoes_russet_5lb",
+      "item_name": "Russet potatoes",
+      "store": "fredmeyer",
+      "price": 0.99,
+      "unit": "5 lb bag",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -258,7 +758,27 @@
       "price": 3.48,
       "unit": "5 lb bag",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "potatoes_russet_5lb",
+      "item_name": "Russet potatoes",
+      "store": "winco",
+      "price": 3.48,
+      "unit": "5 lb bag",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "potatoes_russet_5lb",
+      "item_name": "Russet potatoes",
+      "store": "winco",
+      "price": 3.48,
+      "unit": "5 lb bag",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -268,7 +788,27 @@
       "price": 6.79,
       "unit": "12-ct",
       "source": "walmart_api",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "toilet_paper_12pk",
+      "item_name": "Toilet paper",
+      "store": "fredmeyer",
+      "price": 6.79,
+      "unit": "12-ct",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "toilet_paper_12pk",
+      "item_name": "Toilet paper",
+      "store": "fredmeyer",
+      "price": 6.79,
+      "unit": "12-ct",
+      "source": "walmart_api",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     },
     {
@@ -278,7 +818,27 @@
       "price": 8.98,
       "unit": "12-ct",
       "source": "manual",
-      "observed_at": "2026-05-25",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "toilet_paper_12pk",
+      "item_name": "Toilet paper",
+      "store": "winco",
+      "price": 8.98,
+      "unit": "12-ct",
+      "source": "manual",
+      "observed_at": "2026-05-30",
+      "ad_end_date": null
+    },
+    {
+      "item_key": "toilet_paper_12pk",
+      "item_name": "Toilet paper",
+      "store": "winco",
+      "price": 8.98,
+      "unit": "12-ct",
+      "source": "manual",
+      "observed_at": "2026-05-30",
       "ad_end_date": null
     }
   ]

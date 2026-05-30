@@ -230,6 +230,32 @@ async function fetchViaWebSearch(storeName, storeFullName, searchPrompt) {
 }
 
 export async function fetchRosauerspPrices() {
-  return fetchViaWebSearch('rosauers', 'Rosauers',
-    'Search "Rosauers weekly ad Spokane" on rosauers.com or myweeklyads.net. Local Spokane grocery chain.');
+  try {
+    const resp = await fetch('https://www.rosauers.com/savings/weekly-specials');
+    const html = await resp.text();
+    
+    const response = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: `You are a JSON API. Extract grocery prices from this HTML and return ONLY a raw JSON array with no explanation, no markdown, no backticks, no preamble. Start your response with [ and end with ].
+
+Only include items matching these keys: milk_whole_gallon, eggs_large_dozen, ground_beef_8020_lb, chicken_breast_lb, bread_white_loaf, butter_salted_lb, cheddar_cheese_lb, bananas_lb, potatoes_russet_5lb, toilet_paper_12pk, paper_towels_6pk, pasta_spaghetti_16oz, canola_oil_48oz, orange_juice_52oz
+
+Format: [{"item_key": "milk_whole_gallon", "price": 3.49, "unit": "gal"}]
+If no items match, return exactly: []
+
+
+HTML:
+${html.substring(0, 15000)}`
+      }]
+    });
+    
+    const text = response.content[0].text;
+    return JSON.parse(text.replace(/```json|```/g, '').trim());
+  } catch (err) {
+    console.error('Rosauers fetch failed:', err.message);
+    return [];
+  }
 }
