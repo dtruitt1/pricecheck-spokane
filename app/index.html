@@ -139,6 +139,23 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
 .settings-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
 .settings-desc { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
 /* API Key Setup Modal */
+.store-sel-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+.store-sel-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+</style>
 </style>
 </head>
 <body>
@@ -269,6 +286,16 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
         <img class="preview-img" id="preview-img" />
       </div>
       <div style="margin-top:10px">
+        <div style="margin-bottom:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Which store are you at?</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px" id="store-selector">
+            <button class="store-sel-btn active" onclick="selectStore(this,'winco')">WinCo</button>
+            <button class="store-sel-btn" onclick="selectStore(this,'fredmeyer')">Fred Meyer</button>
+            <button class="store-sel-btn" onclick="selectStore(this,'walmart')">Walmart</button>
+            <button class="store-sel-btn" onclick="selectStore(this,'rosauers')">Rosauers</button>
+            <button class="store-sel-btn" onclick="selectStore(this,'other')">Other</button>
+          </div>
+        </div>
         <button class="btn-primary" id="photo-btn" onclick="runPhoto()" style="width:100%" disabled>Analyze →</button>
       </div>
     </div>
@@ -614,6 +641,12 @@ function handleImg(input) {
   };
   r.readAsDataURL(file);
 }
+let currentStore = 'winco';
+function selectStore(btn, store) {
+  document.querySelectorAll('.store-sel-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentStore = store;
+}
 async function runPhoto() {
   if (!imgBase64) return;
   document.getElementById('verdict-photo').classList.remove('show');
@@ -632,8 +665,12 @@ async function runPhoto() {
 SPOKANE STAPLES:
 ${basketCtx}
 
+The user is currently shopping at: ${currentStore}
+
 Extract item/price/unit from the image. Return ONLY JSON:
-{"item":"...","price":0.00,"unit":"lb|oz|each|gal","verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences for Spokane area.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}`}
+{"item":"...","price":0.00,"unit":"lb|oz|each|gal","verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences for Spokane area.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}
+
+IMPORTANT: For the store matching "${currentStore}", use the scanned price and set source to "you are here" instead of estimated.`}
         ]}]
       })
     });
@@ -644,7 +681,7 @@ Extract item/price/unit from the image. Return ONLY JSON:
     const result=JSON.parse(m[0]);
     document.getElementById('photo-loading').classList.remove('show');
     renderVerdict('verdict-photo',result,result.item,result.price,result.unit);
-    saveHistory(result.item,result.price,result.unit,'photo',result,'photo');
+    saveHistory(result.item,result.price,result.unit,currentStore,result,'photo');
   } catch(e){ document.getElementById('photo-loading').classList.remove('show'); alert('Error: '+e.message); }
   document.getElementById('photo-btn').disabled=false;
 }
