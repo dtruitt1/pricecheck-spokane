@@ -156,7 +156,6 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
   color: #000;
 }
 </style>
-</style>
 </head>
 <body>
 <div class="app">
@@ -229,8 +228,9 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
         <div class="sync-dot" id="vm-src-dot"></div>
         <span id="vm-src-label"></span>
       </div>
+        <div id="vm-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
+      </div>
     </div>
-  </div>
 
   <!-- BARCODE -->
   <div class="panel" id="tab-barcode">
@@ -270,6 +270,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
       </div>
       <div class="verdict-analysis" id="vb-analysis"></div>
       <div class="store-grid" id="vb-grid"></div>
+      <div id="vb-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
     </div>
     <div class="note">Uses ZXing to read EAN-13, UPC-A, Code 128 barcodes. Product info from Open Food Facts (3M+ products).</div>
   </div>
@@ -309,6 +310,7 @@ body { background: var(--bg); color: var(--text); font-family: var(--display); m
       <div class="verdict-analysis" id="vp-analysis"></div>
       <div class="store-grid" id="vp-grid"></div>
       <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic">*estimated prices based on regional market data — not verified at this store</div>
+      <div id="vp-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
     </div>
   </div>
 
@@ -509,6 +511,35 @@ function renderVerdict(cardId, result, item, price, unit) {
       <div class="store-source">${s.source==='you are here' ? 'you are here' : 'estimated*'}</div>
     </div>`
   ).join('');
+
+  // Store comparison one-liner for FAIR or HIGH verdicts
+  if (result.verdict_class === 'fair' || result.verdict_class === 'high') {
+    const basket = priceBasket || FALLBACK;
+    const stores = { winco: 0, walmart: 0, fredmeyer: 0, rosauers: 0 };
+    const counts = { winco: 0, walmart: 0, fredmeyer: 0, rosauers: 0 };
+    Object.values(basket).forEach(item => {
+      const prices = Object.keys(stores).map(s => item[s]?.price).filter(Boolean);
+      if (prices.length < 2) return;
+      const med = [...prices].sort((a,b)=>a-b)[Math.floor(prices.length/2)];
+      Object.keys(stores).forEach(s => {
+        if (item[s]?.price) { stores[s] += (item[s].price - med) / med * 100; counts[s]++; }
+      });
+    });
+    const avgs = Object.keys(stores)
+      .filter(s => counts[s] > 0)
+      .map(s => ({ store: s, pct: stores[s] / counts[s] }))
+      .sort((a,b) => a.pct - b.pct);
+    if (avgs.length >= 2) {
+      const cheapest = avgs[0];
+      const storeNames = { winco: 'WinCo', walmart: 'Walmart', fredmeyer: 'Fred Meyer', rosauers: 'Rosauers' };
+      const diff = Math.abs(avgs[avgs.length-1].pct - cheapest.pct).toFixed(0);
+      const el = document.getElementById(p+'-compare');
+      if (el) el.textContent = `💡 ${storeNames[cheapest.store]} runs ~${diff}% cheaper than ${storeNames[avgs[avgs.length-1].store]} on staples overall.`;
+    }
+  } else {
+    const el = document.getElementById(p+'-compare');
+    if (el) el.textContent = '';
+  }
   if (cardId === 'verdict-main') {
     const pct = Math.max(2, Math.min(98, result.your_price_pct||50));
     const col = result.verdict_class==='good'?'var(--accent)':result.verdict_class==='fair'?'var(--warn)':'var(--danger)';
