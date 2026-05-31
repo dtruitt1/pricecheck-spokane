@@ -228,7 +228,25 @@ async function fetchViaWebSearch(storeName, storeFullName, searchPrompt) {
   console.log(`[${storeName}] Done: ${results.length} items`);
   return { results, errors };
 }
+const WALMART_BASELINE = {
+  milk_whole_gallon: 3.64, eggs_large_dozen: 2.46, ground_beef_8020_lb: 7.43,
+  chicken_breast_lb: 2.57, bread_white_loaf: 1.48, butter_salted_lb: 2.85,
+  cheddar_cheese_lb: 3.58, bananas_lb: 0.50, potatoes_russet_5lb: 2.14,
+  toilet_paper_12pk: 9.98, paper_towels_6pk: 12.96, pasta_spaghetti_16oz: 0.98,
+  canola_oil_48oz: 3.76, orange_juice_52oz: 4.46,
+};
 
+export async function fetchWalmartPrices() {
+  console.log('[walmart] Loading manual baseline...');
+  const today = new Date().toISOString().split('T')[0];
+  const results = STAPLES.filter(s => WALMART_BASELINE[s.item_key]).map(s => ({
+    item_key: s.item_key, item_name: s.item_name, store: 'walmart',
+    price: WALMART_BASELINE[s.item_key], unit: s.unit, source: 'manual',
+    observed_at: today, ad_end_date: null, notes: 'manual baseline',
+  }));
+  console.log(`[walmart] Done: ${results.length} items`);
+  return { results, errors: [] };
+}
 export async function fetchRosauerspPrices() {
   try {
     const resp = await fetch('https://www.rosauers.com/savings/weekly-specials');

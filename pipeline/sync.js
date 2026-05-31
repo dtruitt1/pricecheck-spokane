@@ -1,7 +1,6 @@
-import { fetchWalmartPrices }    from './walmart.js';
-import { fetchWinCoAdPrices, fetchFredMeyerAdPrices,
-         fetchSafewayPrices, fetchAlbertsonsPrices,
-         fetchRosauerspPrices }  from './weekly-ads.js';
+import { fetchWalmartPrices, fetchWinCoAdPrices, fetchFredMeyerAdPrices,
+  fetchSafewayPrices, fetchAlbertsonsPrices,
+  fetchRosauerspPrices }  from './weekly-ads.js';
 import { savePrices, logSync, exportPricesJson } from './db.js';
 import { writeFileSync } from 'fs';
 import { join, dirname } from 'path';
