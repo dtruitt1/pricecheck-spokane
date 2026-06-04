@@ -2,798 +2,1083 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PriceCheck v3 — Spokane</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GrocerEase — Spokane</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@zxing/library@0.19.1/umd/index.min.js"></script>
 <style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+
 :root {
-  --bg: #0e0e10; --surface: #16161a; --surface2: #1e1e24; --border: #2a2a32;
-  --accent: #b5f542; --accent2: #42f5a7; --warn: #f5c842; --danger: #f55442;
-  --text: #e8e8e0; --muted: #6b6b7a;
-  --mono: 'DM Mono', monospace; --display: 'Syne', sans-serif;
+  --bg:        #F5F0E8;
+  --surf:      #FAF6EE;
+  --surf2:     #F0EAD8;
+  --grouped:   #EDE5D4;
+  --sep:       rgba(90,70,30,0.14);
+  --sep2:      rgba(90,70,30,0.07);
+  --text:      #1A2410;
+  --text2:     rgba(40,50,20,0.58);
+  --text3:     rgba(40,50,20,0.34);
+  --good:      #34C759;
+  --good-bg:   rgba(52,199,89,0.12);
+  --good-text: #1A6B2E;
+  --fair:      #E08C00;
+  --fair-bg:   rgba(224,140,0,0.10);
+  --fair-text: #6A4200;
+  --high:      #D93025;
+  --high-bg:   rgba(217,48,37,0.10);
+  --high-text: #7A1A14;
+  --tint:      #2E7D32;
+  --tint-bg:   rgba(46,125,50,0.10);
+  --tint-text: #1B5E20;
+  --canvas:    #EAD9BC;
+  --canvas-dk: #C0A878;
+  --mono:      'DM Mono', monospace;
+  --radius:    16px;
+  --radius-sm: 12px;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--display); min-height: 100vh; }
-.app { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
 
-.header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 28px; }
-.logo-mark { font-family: var(--mono); font-size: 11px; background: var(--accent); color: #0e0e10; padding: 3px 8px; border-radius: 2px; font-weight: 500; letter-spacing: .05em; }
-.logo-text { font-size: 20px; font-weight: 800; letter-spacing: -.03em; }
-.sync-badge { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-left: auto; display: flex; align-items: center; gap: 5px; }
-.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-.sync-dot.live { background: var(--accent2); animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
+body { background: var(--bg); color: var(--text); font-family: -apple-system, "SF Pro Text", system-ui, sans-serif; min-height: 100vh; }
+.app { max-width: 680px; margin: 0 auto; padding-bottom: 40px; }
 
-.tabs { display: flex; gap: 2px; background: var(--surface); border-radius: 8px; padding: 4px; margin-bottom: 20px; }
-.tab { flex: 1; padding: 7px 6px; border: none; background: transparent; color: var(--muted); font-family: var(--display); font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all .15s; }
-.tab.active { background: var(--surface2); color: var(--text); }
+/* ── Header ── */
+.app-header { display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px; background: var(--surf); border-bottom: 0.5px solid var(--sep); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+.app-logo { flex-shrink: 0; }
+.app-title { font-size: 20px; font-weight: 700; letter-spacing: -.03em; flex: 1; color: var(--text); font-family: -apple-system, "SF Pro Display", system-ui, sans-serif; }
+.sync-pill { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; display: flex; align-items: center; gap: 4px; background: var(--good-bg); color: var(--good-text); }
+.sync-pill.est { background: var(--fair-bg); color: var(--fair-text); }
+.sync-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* ── Tab bar ── */
+.tab-bar { display: flex; background: var(--surf); border-bottom: 0.5px solid var(--sep); overflow-x: auto; gap: 0; position: sticky; top: 49px; z-index: 9; }
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab { flex: 1; padding: 10px 4px 9px; border: none; background: transparent; font-family: inherit; font-size: 11px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; min-width: 0; border-bottom: 2px solid transparent; transition: color .15s, border-color .15s; }
+.tab.active { color: var(--tint); border-bottom-color: var(--tint); font-weight: 600; }
+.tab-bar { background: var(--surf); }
 .panel { display: none; } .panel.active { display: block; }
 
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
-.card-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-.input-row { display: flex; gap: 8px; }
-.input-field { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; color: var(--text); font-family: var(--display); font-size: 14px; font-weight: 600; outline: none; transition: border-color .15s; }
-.input-field:focus { border-color: var(--accent); }
-.input-field::placeholder { color: var(--muted); font-weight: 400; }
-.price-input { width: 100px; flex: none; font-family: var(--mono); font-size: 17px; }
-.unit-row { display: flex; gap: 5px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
-.unit-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-family: var(--mono); font-size: 11px; color: var(--muted); cursor: pointer; transition: all .12s; }
-.unit-chip.active, .unit-chip:hover { border-color: var(--accent); color: var(--accent); }
-.btn-primary { background: var(--accent); color: #0e0e10; border: none; border-radius: 8px; padding: 11px 18px; font-family: var(--display); font-weight: 700; font-size: 13px; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
-.btn-primary:hover { opacity: .85; } .btn-primary:disabled { opacity: .35; cursor: default; }
-.btn-sec { background: var(--surface2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 9px 14px; font-family: var(--display); font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s; }
-.btn-sec:hover { border-color: var(--accent); color: var(--accent); }
+/* ── Content wrapper ── */
+.content { padding: 20px 16px 32px; }
 
-/* Verdict */
-.verdict-card { border-radius: 12px; padding: 18px; margin-bottom: 14px; border: 1.5px solid transparent; display: none; animation: fadeUp .25s ease; }
-@keyframes fadeUp { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: none; } }
+/* ── Section headers (iOS grouped style) ── */
+.section-header { font-size: 13px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: .04em; padding: 0 4px 6px; margin-top: 24px; }
+.section-header:first-child { margin-top: 0; }
+
+/* ── Grouped card ── */
+.card { background: var(--surf); border-radius: var(--radius-sm); overflow: hidden; margin-bottom: 8px; }
+
+/* ── Verdict card ── */
+.verdict-card { background: var(--surf); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; display: none; animation: fadeUp .22s cubic-bezier(.4,0,.2,1); }
 .verdict-card.show { display: block; }
-.verdict-card.good { background: #0b1c0b; border-color: var(--accent); }
-.verdict-card.fair { background: #1c180b; border-color: var(--warn); }
-.verdict-card.high { background: #1c0b0b; border-color: var(--danger); }
-.verdict-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-.verdict-badge { font-family: var(--mono); font-size: 11px; padding: 3px 9px; border-radius: 3px; letter-spacing: .08em; flex-shrink: 0; }
-.good .verdict-badge { background: var(--accent); color: #0e0e10; }
-.fair .verdict-badge { background: var(--warn); color: #0e0e10; }
-.high .verdict-badge { background: var(--danger); color: #0e0e10; }
-.verdict-item { font-size: 14px; font-weight: 700; flex: 1; }
-.verdict-price-tag { font-family: var(--mono); font-size: 19px; }
-.verdict-analysis { font-size: 13px; line-height: 1.65; margin-bottom: 12px; opacity: .9; }
-.store-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 12px; }
-.store-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 6px; text-align: center; }
-.store-name { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
-.store-price-val { font-family: var(--mono); font-size: 15px; }
-.store-price-val.best { color: var(--accent); } .store-price-val.mid { color: var(--warn); } .store-price-val.high { color: var(--danger); }
-.store-source { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
-.bar-wrap { margin-bottom: 6px; }
-.bar-labels { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 4px; }
-.bar-track { height: 5px; background: var(--surface2); border-radius: 3px; position: relative; overflow: visible; }
-.bar-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
-.bar-marker { position: absolute; top: -5px; width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 2px solid var(--bg); transform: translateX(-50%); transition: left .6s cubic-bezier(.4,0,.2,1); }
-.data-source-row { font-family: var(--mono); font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; margin-top: 8px; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-/* Loading */
-.loading { display: none; padding: 24px; text-align: center; flex-direction: column; align-items: center; gap: 10px; }
+.verdict-hero { padding: 22px 20px 18px; }
+.verdict-hero.good { background: var(--good-bg); }
+.verdict-hero.fair { background: var(--fair-bg); }
+.verdict-hero.high { background: var(--high-bg); }
+
+.verdict-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+.verdict-label.good { color: var(--good-text); }
+.verdict-label.fair { color: var(--fair-text); }
+.verdict-label.high { color: var(--high-text); }
+
+.verdict-item-name { font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.15; color: var(--text); }
+.verdict-price-main { font-size: 40px; font-weight: 700; letter-spacing: -.04em; line-height: 1.05; margin-top: 4px; }
+.verdict-price-main .unit { font-size: 18px; font-weight: 400; color: var(--text2); }
+.verdict-price-main.good { color: var(--good); }
+.verdict-price-main.fair { color: var(--fair); }
+.verdict-price-main.high { color: var(--high); }
+
+.verdict-analysis { padding: 14px 20px; font-size: 14px; line-height: 1.6; color: var(--text2); border-bottom: 0.5px solid var(--sep); }
+
+/* Store rows */
+.store-row { display: flex; align-items: center; padding: 12px 20px; border-bottom: 0.5px solid var(--sep); }
+.store-row:last-child { border-bottom: none; }
+.store-row-name { font-size: 15px; color: var(--text); flex: 1; }
+.store-row-badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; margin-right: 10px; flex-shrink: 0; }
+.store-row-badge.best { background: var(--good-bg); color: var(--good-text); }
+.store-row-badge.high { background: var(--high-bg); color: var(--high-text); }
+.store-row-badge.here { background: var(--tint-bg); color: var(--tint); }
+.store-row-price { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 44px; text-align: right; color: var(--text); }
+.store-row-price.best { color: var(--good); }
+.store-row-price.high { color: var(--high); }
+.store-row-source { font-size: 11px; color: var(--text3); margin-left: 6px; }
+
+/* Position bar */
+.bar-section { padding: 14px 20px 16px; border-top: 0.5px solid var(--sep); }
+.bar-eyebrow { font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+.bar-track { height: 4px; background: var(--grouped); border-radius: 2px; position: relative; margin-bottom: 6px; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.bar-fill.good { background: var(--good); }
+.bar-fill.fair { background: linear-gradient(90deg, var(--good) 0%, var(--fair) 100%); }
+.bar-fill.high { background: linear-gradient(90deg, var(--good) 0%, var(--high) 100%); }
+.bar-thumb { position: absolute; top: -6px; width: 16px; height: 16px; background: var(--surf); border-radius: 50%; transform: translateX(-50%); box-shadow: 0 1px 4px rgba(0,0,0,.18); border: 2px solid; transition: left .6s cubic-bezier(.4,0,.2,1); }
+.bar-thumb.good { border-color: var(--good); }
+.bar-thumb.fair { border-color: var(--fair); }
+.bar-thumb.high { border-color: var(--high); }
+.bar-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); font-variant-numeric: tabular-nums; }
+
+/* Compare + ATL */
+.compare-row { padding: 12px 20px; font-size: 13px; color: var(--tint); border-top: 0.5px solid var(--sep); }
+.atl-row { padding: 12px 20px; border-top: 0.5px solid var(--sep); display: none; align-items: center; gap: 8px; flex-wrap: wrap; }
+.atl-row.show { display: flex; }
+.atl-label { font-size: 12px; color: var(--text2); flex-shrink: 0; }
+.atl-btn { border: none; border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity .15s; }
+.atl-btn.pri { background: var(--tint); color: #fff; }
+.atl-btn.sec { background: var(--grouped); color: var(--tint); }
+.atl-btn.added { background: var(--good-bg); color: var(--good-text); }
+
+/* Source row */
+.src-row { padding: 10px 20px; border-top: 0.5px solid var(--sep); display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+
+/* ── Input controls ── */
+.input-group { padding: 0 16px; }
+.ios-input { width: 100%; background: transparent; border: none; outline: none; font-size: 16px; font-family: inherit; color: var(--text); padding: 12px 0; border-bottom: 0.5px solid var(--sep); }
+.ios-input::placeholder { color: var(--text3); }
+.ios-input:last-child { border-bottom: none; }
+
+.row-input { display: flex; align-items: center; padding: 0 16px; border-bottom: 0.5px solid var(--sep); }
+.row-input:last-child { border-bottom: none; }
+.row-label { font-size: 15px; color: var(--text); width: 80px; flex-shrink: 0; padding: 12px 0; }
+.row-field { flex: 1; background: transparent; border: none; outline: none; font-size: 16px; font-family: inherit; color: var(--text); padding: 12px 0; text-align: right; }
+.row-field::placeholder { color: var(--text3); }
+
+/* Unit chips */
+.unit-wrap { display: flex; gap: 6px; flex-wrap: wrap; padding: 12px 16px; border-top: 0.5px solid var(--sep); }
+.uchip { padding: 5px 13px; border-radius: 20px; font-size: 13px; font-family: var(--mono); color: var(--text2); background: var(--grouped); border: none; cursor: pointer; transition: all .12s; }
+.uchip.active { background: var(--tint); color: #fff; }
+
+/* Primary button */
+.btn-primary { width: 100%; padding: 14px; background: var(--tint); color: #fff; border: none; border-radius: var(--radius-sm); font-size: 16px; font-weight: 600; font-family: inherit; cursor: pointer; transition: opacity .15s; margin-top: 12px; }
+.btn-primary:disabled { opacity: .35; cursor: default; }
+.btn-primary:active { opacity: .8; }
+.btn-sec { padding: 10px 16px; background: var(--grouped); color: var(--tint); border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; font-family: inherit; cursor: pointer; }
+
+/* ── Loading ── */
+.loading { display: none; flex-direction: column; align-items: center; gap: 12px; padding: 32px 20px; }
 .loading.show { display: flex; }
-.spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .65s linear infinite; }
+.spinner { width: 28px; height: 28px; border: 2.5px solid var(--grouped); border-top-color: var(--tint); border-radius: 50%; animation: spin .6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.loading-steps { display: flex; flex-direction: column; gap: 3px; }
-.lstep { font-family: var(--mono); font-size: 11px; color: var(--muted); opacity: .35; transition: all .25s; }
-.lstep.active { opacity: 1; color: var(--accent2); }
-.lstep.done { opacity: .6; color: var(--accent); }
+.load-step { font-size: 13px; color: var(--text3); opacity: 0; transition: opacity .2s; }
+.load-step.active { opacity: 1; color: var(--text2); }
+.load-step.done { opacity: .5; color: var(--good-text); }
 
-/* Barcode */
-.scanner-wrap { position: relative; border-radius: 10px; overflow: hidden; background: #000; aspect-ratio: 4/3; }
+/* ── Barcode ── */
+.scanner-wrap { border-radius: var(--radius-sm); overflow: hidden; background: #000; aspect-ratio: 4/3; position: relative; }
 #barcode-video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .scan-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
-.scan-frame { width: 62%; aspect-ratio: 3/1; border: 2px solid var(--accent); border-radius: 4px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,.5); }
-.scan-line { position: absolute; left: 4px; right: 4px; top: 50%; height: 2px; background: var(--accent); opacity: .8; animation: scanln 2s ease-in-out infinite; }
+.scan-frame { width: 62%; aspect-ratio: 3/1; border: 2px solid rgba(255,255,255,.8); border-radius: 6px; position: relative; box-shadow: 0 0 0 9999px rgba(0,0,0,.5); }
+.scan-line { position: absolute; left: 4px; right: 4px; top: 50%; height: 2px; background: var(--tint); opacity: .9; animation: scanln 2s ease-in-out infinite; }
 @keyframes scanln { 0%,100%{top:15%}50%{top:85%} }
-.scan-status { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text); background: rgba(0,0,0,.6); padding: 5px; }
-.scan-flash { position: absolute; inset: 0; background: var(--accent); opacity: 0; pointer-events: none; transition: opacity .1s; border-radius: 10px; }
-.upc-result { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px; margin-top: 10px; display: none; }
-.upc-result.show { display: block; }
-.upc-product-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-.upc-brand { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+.scan-status { position: absolute; bottom: 12px; left: 0; right: 0; text-align: center; font-size: 12px; color: rgba(255,255,255,.8); }
+.scan-flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; transition: opacity .1s; }
 
-/* Photo upload */
-.upload-zone { border: 1.5px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all .15s; position: relative; }
-.upload-zone:hover { border-color: var(--accent); }
-.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-.preview-img { max-width: 100%; border-radius: 6px; margin-top: 10px; display: none; }
+/* ── Photo ── */
+.upload-zone { border: 1.5px dashed var(--sep); border-radius: var(--radius-sm); padding: 28px 20px; text-align: center; cursor: pointer; transition: border-color .15s; position: relative; background: var(--surf); }
+.upload-zone:hover { border-color: var(--tint); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.preview-img { max-width: 100%; border-radius: 10px; margin-top: 12px; display: none; }
+.store-sel-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.store-sel-btn { padding: 6px 14px; border-radius: 20px; border: 1px solid var(--sep); background: var(--surf); color: var(--text2); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all .15s; }
+.store-sel-btn.active { background: var(--tint); border-color: var(--tint); color: #fff; }
 
-/* Index */
-.index-table { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-.irow { display: grid; grid-template-columns: 1fr 80px 100px 78px; padding: 9px 14px; border-bottom: 1px solid var(--border); font-size: 12px; align-items: center; }
+/* ── Index table ── */
+.index-table { background: var(--surf); border-radius: var(--radius-sm); overflow: hidden; }
+.irow { display: grid; grid-template-columns: 1fr 72px 100px 72px; padding: 10px 16px; border-bottom: 0.5px solid var(--sep); font-size: 13px; align-items: center; gap: 4px; }
 .irow:last-child { border-bottom: none; }
-.irow.head { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--surface2); }
-.irow-name { font-weight: 600; }
-.irow-unit { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.ip { font-family: var(--mono); font-size: 12px; text-align: right; }
-.ip.lo { color: var(--accent); } .ip.hi { color: var(--danger); }
-.ip.est { color: var(--muted); font-style: italic; }
-.markup-wrap { margin-top: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
-.markup-title { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-.mrow { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.mstore { font-family: var(--mono); font-size: 11px; width: 86px; color: var(--muted); }
-.mbar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; }
-.mbar-fill { height: 100%; border-radius: 3px; }
-.mpct { font-family: var(--mono); font-size: 11px; width: 40px; text-align: right; }
+.irow.head { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text2); background: var(--grouped); padding: 8px 16px; }
+.irow-name { font-weight: 500; font-size: 14px; }
+.irow-unit { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.ip { font-size: 13px; font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
+.ip.lo { color: var(--good); font-weight: 600; }
+.ip.hi { color: var(--high); }
+.ip.est { color: var(--text3); font-style: italic; }
 
-/* History */
-.hrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; }
-.hrow:hover { background: var(--surface2); } .hrow:last-child { border-bottom: none; }
-.hdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.hdot.good { background: var(--accent); } .hdot.fair { background: var(--warn); } .hdot.high { background: var(--danger); }
-.hitem { flex: 1; font-weight: 600; font-size: 13px; }
-.hmeta { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.hsrc { font-family: var(--mono); font-size: 9px; padding: 2px 5px; border-radius: 3px; background: var(--surface2); color: var(--muted); }
-.hprice { font-family: var(--mono); font-size: 14px; }
+.markup-card { background: var(--surf); border-radius: var(--radius-sm); padding: 16px; margin-top: 8px; }
+.markup-title { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text2); margin-bottom: 14px; }
+.mrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.mrow:last-child { margin-bottom: 0; }
+.mstore { font-size: 13px; color: var(--text2); width: 82px; }
+.mbar-track { flex: 1; height: 4px; background: var(--grouped); border-radius: 2px; }
+.mbar-fill { height: 100%; border-radius: 2px; }
+.mpct { font-size: 12px; font-variant-numeric: tabular-nums; width: 36px; text-align: right; font-family: var(--mono); }
 
-.empty { text-align: center; padding: 36px 16px; color: var(--muted); font-size: 13px; }
-.note { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.6; padding: 10px 14px; background: var(--surface2); border-radius: 6px; border-left: 2px solid var(--border); margin-top: 10px; }
+/* ── History ── */
+.hrow { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 0.5px solid var(--sep); cursor: pointer; transition: background .1s; }
+.hrow:hover { background: var(--surf2); }
+.hrow:last-child { border-bottom: none; }
+.h-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.h-dot.good { background: var(--good); }
+.h-dot.fair { background: var(--fair); }
+.h-dot.high { background: var(--high); }
+.h-item { flex: 1; font-size: 15px; font-weight: 500; }
+.h-meta { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.h-src { font-size: 11px; font-family: var(--mono); color: var(--text3); padding: 2px 6px; background: var(--grouped); border-radius: 4px; }
+.h-price { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.h-add { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--sep); background: transparent; color: var(--tint); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; line-height: 1; transition: all .15s; }
+.h-add:hover { background: var(--tint-bg); border-color: var(--tint); }
 
-/* Settings */
-.settings-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.settings-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.settings-desc { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-/* API Key Setup Modal */
-.store-sel-btn {
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .15s;
-}
-.store-sel-btn.active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
-}
+/* ── LISTS ── */
+.list-store-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.lst-tab { padding: 6px 14px; border: 1px solid var(--sep); border-radius: 20px; background: var(--surf); color: var(--text2); font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer; transition: all .15s; position: relative; }
+.lst-tab.active { background: var(--tint); border-color: var(--tint); color: #fff; }
+.lst-count { position: absolute; top: -5px; right: -5px; background: var(--high); color: #fff; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; display: none; align-items: center; justify-content: center; font-weight: 700; }
+.lst-count.show { display: flex; }
+
+/* List item rows */
+.li-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 0.5px solid var(--sep); transition: opacity .2s; }
+.li-row:last-child { border-bottom: none; }
+.li-row.checked { opacity: .45; }
+.li-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--sep); background: transparent; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; transition: all .15s; }
+.li-check.manual   { background: var(--fair-bg);  border-color: var(--fair);  color: var(--fair); }
+.li-check.verified { background: var(--good);      border-color: var(--good);  color: #fff; }
+.li-content { flex: 1; min-width: 0; }
+.li-name  { font-size: 15px; font-weight: 500; color: var(--text); }
+.li-meta  { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.li-verified-label { font-size: 11px; color: var(--good-text); margin-top: 2px; }
+.stale-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--fair); margin-right: 4px; vertical-align: 2px; }
+
+/* Qty stepper */
+.qty-stepper { display: flex; align-items: center; border: 0.5px solid var(--sep); border-radius: 7px; overflow: hidden; flex-shrink: 0; }
+.qty-btn { width: 26px; height: 26px; background: var(--grouped); border: none; color: var(--tint); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; transition: background .1s; }
+.qty-btn:active { background: var(--sep); }
+.qty-val { font-size: 13px; font-variant-numeric: tabular-nums; padding: 0 7px; color: var(--text); min-width: 26px; text-align: center; }
+
+/* Verify button */
+.verify-btn-wrap { position: relative; flex-shrink: 0; }
+.verify-btn { display: flex; align-items: center; gap: 4px; border: 1px solid var(--tint); border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 500; color: var(--tint); background: var(--tint-bg); cursor: pointer; white-space: nowrap; font-family: inherit; transition: background .15s; }
+.verify-btn:hover { background: var(--tint-bg); }
+.verify-btn.verified { border-color: var(--good); color: var(--good-text); background: var(--good-bg); }
+.verify-btn input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+.li-remove { background: transparent; border: none; color: var(--text3); font-size: 18px; cursor: pointer; flex-shrink: 0; padding: 2px; line-height: 1; transition: color .15s; }
+.li-remove:hover { color: var(--high); }
+
+/* List totals */
+.list-totals { background: var(--surf); border-radius: var(--radius-sm); overflow: hidden; margin-top: 8px; }
+.lt-row { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-bottom: 0.5px solid var(--sep); }
+.lt-row:last-child { border-bottom: none; }
+.lt-label { font-size: 15px; color: var(--text); }
+.lt-val   { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+.lt-savings-label { font-size: 13px; color: var(--good-text); }
+.lt-savings-val   { font-size: 13px; font-weight: 600; color: var(--good-text); }
+
+/* Savings banner */
+.savings-banner { background: var(--good-bg); border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 8px; }
+.sb-title { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--good-text); margin-bottom: 4px; }
+.sb-headline { font-size: 16px; font-weight: 600; color: var(--good-text); }
+.sb-detail { font-size: 13px; color: var(--good-text); opacity: .7; margin-top: 3px; }
+
+/* List actions */
+.list-actions { display: flex; gap: 8px; margin-top: 8px; }
+.list-actions .btn-sec { flex: 1; text-align: center; }
+
+/* ── Modal ── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal-sheet { background: var(--surf); border-radius: 20px 20px 0 0; padding: 20px 20px 40px; width: 100%; max-width: 680px; animation: sheetUp .22s cubic-bezier(.4,0,.2,1); }
+@keyframes sheetUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.modal-handle { width: 36px; height: 4px; background: var(--sep); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 17px; font-weight: 600; margin-bottom: 16px; }
+.modal-close { float: right; background: var(--grouped); border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 16px; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-input { width: 100%; background: var(--grouped); border: none; border-radius: 10px; padding: 12px 14px; font-size: 15px; font-family: inherit; color: var(--text); outline: none; margin-bottom: 10px; }
+.modal-input::placeholder { color: var(--text3); }
+.modal-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.modal-hint { font-size: 12px; color: var(--good-text); margin-bottom: 10px; min-height: 16px; }
+
+/* Store picker popover */
+.store-picker { display: none; position: fixed; background: var(--surf); border-radius: var(--radius-sm); padding: 6px; z-index: 200; min-width: 150px; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+.store-picker.open { display: block; }
+.sp-opt { padding: 10px 12px; font-size: 15px; border-radius: 8px; cursor: pointer; color: var(--text); transition: background .1s; }
+.sp-opt:hover { background: var(--grouped); }
+
+/* Toast */
+#pc-toast { position: fixed; bottom: 88px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.75); border-radius: 20px; padding: 10px 18px; font-size: 14px; font-weight: 500; color: #fff; z-index: 300; transition: opacity .25s; pointer-events: none; white-space: nowrap; backdrop-filter: blur(10px); }
+
+.empty { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 15px; line-height: 1.6; }
 </style>
 </head>
 <body>
 <div class="app">
 
-  <div class="header">
-    <span class="logo-mark">v3</span>
-    <span class="logo-text">PriceCheck</span>
-    <div class="sync-badge">
-      <div class="sync-dot" id="sync-dot"></div>
+  <!-- Header -->
+  <div class="app-header">
+    <div class="app-logo">
+      <svg width="36" height="44" viewBox="0 0 130 155" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 70 L11 136 Q11 142 18 142 L112 142 Q119 142 119 136 L116 70 Z" fill="#EAD9BC" stroke="#C0A878" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M14 70 L116 70" stroke="#C0A878" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="14" y1="70" x2="12" y2="142" stroke="#C8B890" stroke-width="1"/>
+        <line x1="116" y1="70" x2="118" y2="142" stroke="#C8B890" stroke-width="1"/>
+        <line x1="16" y1="124" x2="114" y2="124" stroke="#C0A878" stroke-width="0.9" stroke-dasharray="5,5"/>
+        <rect x="28" y="76" width="74" height="38" rx="6" fill="none" stroke="#B09050" stroke-width="2"/>
+        <rect x="32" y="80" width="66" height="30" rx="4" fill="none" stroke="#C8A860" stroke-width="1.2" stroke-dasharray="4,3"/>
+        <path d="M19 72 Q13 48 15 18 Q16 11 20 13 Q26 18 23 72" fill="#E8C070" stroke="#B89038" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M18 60 L23 53" stroke="#B89038" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M17.5 48 L22.5 41" stroke="#B89038" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M17 36 L22 29" stroke="#B89038" stroke-width="1.1" stroke-linecap="round"/>
+        <path d="M58 72 Q46 56 37 36 Q32 24 37 17 Q44 12 50 24 Q56 40 58 72Z" fill="#4AAA20"/>
+        <path d="M58 72 Q52 52 46 28 Q41 14 48 9 Q57 5 60 22 Q62 42 58 72Z" fill="#5ABB28"/>
+        <path d="M58 72 Q59 48 54 22 Q52 9 61 6 Q70 4 69 22 Q67 44 58 72Z" fill="#3A9A18"/>
+        <path d="M58 72 Q65 50 72 26 Q76 12 83 15 Q90 19 85 33 Q78 52 58 72Z" fill="#4AAA20"/>
+        <path d="M58 72 Q72 54 82 34 Q88 22 95 26 Q100 32 93 44 Q84 60 58 72Z" fill="#5ABB28"/>
+        <path d="M58 72 Q53 54 54 40 Q56 30 60 28 Q66 28 65 42 Q64 56 58 72Z" fill="#7ADD38"/>
+        <path d="M58 72 Q56 58 57 48 Q58 42 61 41 Q65 42 64 50 Q62 60 58 72Z" fill="#C0F070"/>
+        <path d="M37 17 Q30 9 27 16 Q34 20 37 17Z" fill="#4AAA20"/>
+        <path d="M95 26 Q102 19 101 26 Q97 30 95 26Z" fill="#5ABB28"/>
+        <path d="M60 6 Q60 -2 66 2 Q65 7 60 6Z" fill="#4AAA20"/>
+        <path d="M105 72 Q109 52 107 28 Q106 21 104 23 Q100 28 102 72" fill="#F07020" stroke="#C05010" stroke-width="1.3" stroke-linejoin="round"/>
+        <path d="M106 28 Q103 18 101 10" stroke="#3A7818" stroke-width="1.9" stroke-linecap="round" fill="none"/>
+        <path d="M106 28 Q108 17 111 11" stroke="#4A8820" stroke-width="1.9" stroke-linecap="round" fill="none"/>
+        <circle cx="30" cy="64" r="12" fill="#D42828"/>
+        <path d="M34 47 Q40 42 39 49 Q37 48 34 47Z" fill="#3A8820"/>
+        <ellipse cx="26" cy="59" rx="2.5" ry="3.5" fill="rgba(255,255,255,0.25)" transform="rotate(-20 26 59)"/>
+        <circle cx="58" cy="67" r="11" fill="#F4F0E4" stroke="#D8D0B8" stroke-width="1.2"/>
+        <path d="M52 63 Q58 58 64 63" stroke="#C8C0A0" stroke-width="0.9" fill="none"/>
+        <path d="M51 67 Q58 62 65 67" stroke="#C8C0A0" stroke-width="0.9" fill="none"/>
+        <path d="M78 58 Q72 52 70 60 Q69 70 76 73 Q84 75 87 67 Q90 59 85 51 Q81 45 78 58Z" fill="#F0D020" stroke="#C8A810" stroke-width="1.2"/>
+        <path d="M79 46 Q82 40 84 43 Q82 46 79 46Z" fill="#4A8820"/>
+        <circle cx="96" cy="63" r="12" fill="#F07828"/>
+        <circle cx="102" cy="126" r="11" fill="#34C759"/>
+        <path d="M96 126 L101 131 L109 119" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="app-title">GrocerEase</div>
+    <div class="sync-pill" id="sync-pill">
+      <div class="sync-dot"></div>
       <span id="sync-label">loading…</span>
     </div>
   </div>
 
-  <div class="tabs">
+  <!-- Tabs -->
+  <div class="tab-bar">
     <button class="tab active" onclick="switchTab('check',this)">Check</button>
     <button class="tab" onclick="switchTab('barcode',this)">Barcode</button>
     <button class="tab" onclick="switchTab('photo',this)">Photo</button>
+    <button class="tab" onclick="switchTab('lists',this)">Lists</button>
     <button class="tab" onclick="switchTab('index',this)">Index</button>
     <button class="tab" onclick="switchTab('history',this)">History</button>
   </div>
 
   <!-- CHECK -->
   <div class="panel active" id="tab-check">
-    <div class="card">
-      <div class="card-label">Enter item + price</div>
-      <div class="input-row">
-        <input class="input-field" id="item-name" placeholder="e.g. ground beef, 80/20" />
-        <input class="input-field price-input" id="item-price" type="number" step="0.01" min="0" placeholder="$0.00" />
-      </div>
-      <div class="unit-row">
-        <div class="card-label" style="margin:0;line-height:2.2;font-size:9px">unit:</div>
-        <span class="unit-chip active" onclick="setUnit(this,'lb')">/lb</span>
-        <span class="unit-chip" onclick="setUnit(this,'oz')">/oz</span>
-        <span class="unit-chip" onclick="setUnit(this,'each')">each</span>
-        <span class="unit-chip" onclick="setUnit(this,'gal')">/gal</span>
-        <span class="unit-chip" onclick="setUnit(this,'ct')">/ct</span>
-        <span class="unit-chip" onclick="setUnit(this,'custom')">…</span>
-      </div>
-      <div style="margin-top:8px">
-        <input class="input-field" id="item-store" placeholder="Store (optional)" style="font-size:13px" />
-      </div>
-      <div style="margin-top:10px">
-        <button class="btn-primary" id="check-btn" onclick="runCheck()" style="width:100%">Get verdict →</button>
-      </div>
-    </div>
-    <div class="loading" id="check-loading">
-      <div class="spinner"></div>
-      <div class="loading-steps">
-        <div class="lstep" id="ls0">loading price data…</div>
-        <div class="lstep" id="ls1">comparing against Spokane market…</div>
-        <div class="lstep" id="ls2">generating verdict…</div>
-      </div>
-    </div>
-    <div class="verdict-card" id="verdict-main">
-      <div class="verdict-top">
-        <span class="verdict-badge" id="vm-badge"></span>
-        <span class="verdict-item" id="vm-item"></span>
-        <span class="verdict-price-tag" id="vm-price"></span>
-      </div>
-      <div class="verdict-analysis" id="vm-analysis"></div>
-      <div class="store-grid" id="vm-grid"></div>
-      <div class="bar-wrap">
-        <div class="bar-labels"><span id="vm-lo"></span><span>your price</span><span id="vm-hi"></span></div>
-        <div class="bar-track">
-          <div class="bar-fill" id="vm-fill" style="width:0%"></div>
-          <div class="bar-marker" id="vm-marker" style="left:0%"></div>
+    <div class="content">
+      <div class="section-header">Enter item + price</div>
+      <div class="card">
+        <div class="row-input">
+          <span class="row-label">Item</span>
+          <input class="row-field" id="item-name" placeholder="e.g. ground beef 80/20" />
+        </div>
+        <div class="row-input">
+          <span class="row-label">Price</span>
+          <input class="row-field" id="item-price" type="number" step="0.01" min="0" placeholder="$0.00" style="font-size:22px;font-weight:600;" />
+        </div>
+        <div class="row-input">
+          <span class="row-label">Store</span>
+          <input class="row-field" id="item-store" placeholder="optional" />
+        </div>
+        <div class="unit-wrap">
+          <span class="uchip active" onclick="setUnit(this,'lb')">/lb</span>
+          <span class="uchip" onclick="setUnit(this,'oz')">/oz</span>
+          <span class="uchip" onclick="setUnit(this,'each')">each</span>
+          <span class="uchip" onclick="setUnit(this,'/gal')">/gal</span>
+          <span class="uchip" onclick="setUnit(this,'/ct')">/ct</span>
+          <span class="uchip" onclick="setUnit(this,'custom')">…</span>
         </div>
       </div>
-      <div class="data-source-row">
-        <div class="sync-dot" id="vm-src-dot"></div>
-        <span id="vm-src-label"></span>
+      <button class="btn-primary" id="check-btn" onclick="runCheck()">Get verdict</button>
+
+      <div class="loading" id="check-loading">
+        <div class="spinner"></div>
+        <div class="load-step" id="ls0">Loading price data…</div>
+        <div class="load-step" id="ls1">Comparing Spokane market…</div>
+        <div class="load-step" id="ls2">Generating verdict…</div>
       </div>
-        <div id="vm-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
+
+      <div class="verdict-card" id="verdict-main">
+        <div class="verdict-hero" id="vm-hero">
+          <div class="verdict-label" id="vm-label"></div>
+          <div class="verdict-item-name" id="vm-item"></div>
+          <div class="verdict-price-main" id="vm-price"></div>
+        </div>
+        <div class="verdict-analysis" id="vm-analysis"></div>
+        <div id="vm-stores"></div>
+        <div class="bar-section">
+          <div class="bar-eyebrow">Your price position</div>
+          <div class="bar-track">
+            <div class="bar-fill" id="vm-fill" style="width:0%"></div>
+            <div class="bar-thumb" id="vm-thumb" style="left:0%"></div>
+          </div>
+          <div class="bar-ends"><span id="vm-lo"></span><span id="vm-hi"></span></div>
+        </div>
+        <div class="compare-row" id="vm-compare" style="display:none"></div>
+        <div class="atl-row" id="vm-atl">
+          <span class="atl-label">Add to list</span>
+          <button class="atl-btn pri" onclick="quickAddToList('vm','winco')">WinCo</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vm','walmart')">Walmart</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vm','fredmeyer')">Fred Meyer</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vm','rosauers')">Rosauers</button>
+        </div>
+        <div class="src-row" id="vm-src"></div>
       </div>
     </div>
+  </div>
 
   <!-- BARCODE -->
   <div class="panel" id="tab-barcode">
-    <div class="card" style="padding:14px">
-      <div class="card-label">Scan barcode</div>
-      <div class="scanner-wrap">
-        <video id="barcode-video" playsinline autoplay muted></video>
-        <div class="scan-overlay"><div class="scan-frame"><div class="scan-line"></div></div></div>
-        <div class="scan-status" id="scan-status">Press start to activate camera</div>
-        <div class="scan-flash" id="scan-flash"></div>
+    <div class="content">
+      <div class="section-header">Scan barcode</div>
+      <div class="card" style="padding:14px">
+        <div class="scanner-wrap">
+          <video id="barcode-video" playsinline autoplay muted></video>
+          <div class="scan-overlay"><div class="scan-frame"><div class="scan-line"></div></div></div>
+          <div class="scan-status" id="scan-status">Press start to activate camera</div>
+          <div class="scan-flash" id="scan-flash"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn-primary" id="start-btn" onclick="startScanner()" style="margin:0;flex:1">Start camera</button>
+          <button class="btn-sec" id="stop-btn" onclick="stopScanner()" style="display:none">Stop</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <span style="font-size:12px;color:var(--text2);white-space:nowrap">or enter UPC:</span>
+          <input class="modal-input" id="upc-manual" placeholder="012345678901" style="margin:0;flex:1;font-family:var(--mono)" />
+          <button class="btn-sec" onclick="lookupUPC(document.getElementById('upc-manual').value)">Look up</button>
+        </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn-primary" id="start-btn" onclick="startScanner()" style="flex:1">Start camera</button>
-        <button class="btn-sec" id="stop-btn" onclick="stopScanner()" style="display:none">Stop</button>
+
+      <div id="upc-result" style="display:none">
+        <div class="section-header" style="margin-top:16px">Product found</div>
+        <div class="card">
+          <div style="padding:14px 16px;border-bottom:0.5px solid var(--sep)">
+            <div style="font-size:17px;font-weight:600" id="upc-name"></div>
+            <div style="font-size:13px;color:var(--text2);margin-top:3px" id="upc-brand"></div>
+          </div>
+          <div class="row-input">
+            <span class="row-label">Price</span>
+            <input class="row-field" id="upc-price" type="number" step="0.01" min="0" placeholder="$0.00" style="font-size:22px;font-weight:600;" />
+          </div>
+          <div class="row-input">
+            <span class="row-label">Store</span>
+            <input class="row-field" id="upc-store" placeholder="optional" />
+          </div>
+        </div>
+        <button class="btn-primary" onclick="runUPCCheck()" style="margin-top:0">Check price</button>
       </div>
-      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-        <span style="font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap">or UPC:</span>
-        <input class="input-field" id="upc-manual" placeholder="012345678901" style="font-family:var(--mono);font-size:12px" />
-        <button class="btn-sec" onclick="lookupUPC(document.getElementById('upc-manual').value)">Look up</button>
+
+      <div class="loading" id="barcode-loading"><div class="spinner"></div><div class="load-step active" id="bl-text">Looking up…</div></div>
+
+      <div class="verdict-card" id="verdict-barcode">
+        <div class="verdict-hero" id="vb-hero">
+          <div class="verdict-label" id="vb-label"></div>
+          <div class="verdict-item-name" id="vb-item"></div>
+          <div class="verdict-price-main" id="vb-price"></div>
+        </div>
+        <div class="verdict-analysis" id="vb-analysis"></div>
+        <div id="vb-stores"></div>
+        <div class="compare-row" id="vb-compare" style="display:none"></div>
+        <div class="atl-row" id="vb-atl">
+          <span class="atl-label">Add to list</span>
+          <button class="atl-btn pri" onclick="quickAddToList('vb','winco')">WinCo</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vb','walmart')">Walmart</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vb','fredmeyer')">Fred Meyer</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vb','rosauers')">Rosauers</button>
+        </div>
       </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:12px;text-align:center">ZXing · EAN-13, UPC-A, Code 128 · Open Food Facts</div>
     </div>
-    <div class="upc-result" id="upc-result">
-      <div class="upc-product-name" id="upc-name"></div>
-      <div class="upc-brand" id="upc-brand"></div>
-      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <input class="input-field price-input" id="upc-price" type="number" step="0.01" min="0" placeholder="$0.00" />
-        <input class="input-field" id="upc-store" placeholder="Store" style="flex:1;font-size:13px" />
-        <button class="btn-primary" onclick="runUPCCheck()">Check →</button>
-      </div>
-    </div>
-    <div class="loading" id="barcode-loading"><div class="spinner"></div><span class="lstep active" id="bl-text">looking up…</span></div>
-    <div class="verdict-card" id="verdict-barcode">
-      <div class="verdict-top">
-        <span class="verdict-badge" id="vb-badge"></span>
-        <span class="verdict-item" id="vb-item"></span>
-        <span class="verdict-price-tag" id="vb-price"></span>
-      </div>
-      <div class="verdict-analysis" id="vb-analysis"></div>
-      <div class="store-grid" id="vb-grid"></div>
-      <div id="vb-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
-    </div>
-    <div class="note">Uses ZXing to read EAN-13, UPC-A, Code 128 barcodes. Product info from Open Food Facts (3M+ products).</div>
   </div>
 
   <!-- PHOTO -->
   <div class="panel" id="tab-photo">
-    <div class="card">
-      <div class="card-label">Photo of price tag or label</div>
+    <div class="content">
+      <div class="section-header">Photo of price tag or label</div>
       <div class="upload-zone">
         <input type="file" accept="image/*" id="img-input" onchange="handleImg(this)" />
-        <div style="font-size:24px;margin-bottom:6px">📷</div>
-        <div style="font-size:14px;font-weight:600;margin-bottom:3px">Take photo or upload</div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Price tag, shelf label, or receipt</div>
+        <div style="font-size:32px;margin-bottom:8px">📷</div>
+        <div style="font-size:16px;font-weight:600;margin-bottom:4px">Take photo or upload</div>
+        <div style="font-size:13px;color:var(--text2)">Price tag, shelf label, or receipt</div>
         <img class="preview-img" id="preview-img" />
       </div>
-      <div style="margin-top:10px">
-        <div style="margin-bottom:8px">
-          <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Which store are you at?</div>
-          <div style="display:flex;flex-wrap:wrap;gap:6px" id="store-selector">
-            <button class="store-sel-btn active" onclick="selectStore(this,'winco')">WinCo</button>
-            <button class="store-sel-btn" onclick="selectStore(this,'fredmeyer')">Fred Meyer</button>
-            <button class="store-sel-btn" onclick="selectStore(this,'walmart')">Walmart</button>
-            <button class="store-sel-btn" onclick="selectStore(this,'rosauers')">Rosauers</button>
-            <button class="store-sel-btn" onclick="selectStore(this,'other')">Other</button>
-          </div>
+      <div class="section-header" style="margin-top:16px">Which store are you at?</div>
+      <div class="store-sel-wrap">
+        <button class="store-sel-btn active" onclick="selectStore(this,'winco')">WinCo</button>
+        <button class="store-sel-btn" onclick="selectStore(this,'fredmeyer')">Fred Meyer</button>
+        <button class="store-sel-btn" onclick="selectStore(this,'walmart')">Walmart</button>
+        <button class="store-sel-btn" onclick="selectStore(this,'rosauers')">Rosauers</button>
+        <button class="store-sel-btn" onclick="selectStore(this,'other')">Other</button>
+      </div>
+      <button class="btn-primary" id="photo-btn" onclick="runPhoto()" disabled>Analyze photo</button>
+
+      <div class="loading" id="photo-loading"><div class="spinner"></div><div class="load-step active">Reading image…</div></div>
+
+      <div class="verdict-card" id="verdict-photo">
+        <div class="verdict-hero" id="vp-hero">
+          <div class="verdict-label" id="vp-label"></div>
+          <div class="verdict-item-name" id="vp-item"></div>
+          <div class="verdict-price-main" id="vp-price"></div>
         </div>
-        <button class="btn-primary" id="photo-btn" onclick="runPhoto()" style="width:100%" disabled>Analyze →</button>
+        <div class="verdict-analysis" id="vp-analysis"></div>
+        <div id="vp-stores"></div>
+        <div class="compare-row" id="vp-compare" style="display:none"></div>
+        <div class="atl-row" id="vp-atl">
+          <span class="atl-label">Add to list</span>
+          <button class="atl-btn pri" onclick="quickAddToList('vp','winco')">WinCo</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vp','walmart')">Walmart</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vp','fredmeyer')">Fred Meyer</button>
+          <button class="atl-btn sec" onclick="quickAddToList('vp','rosauers')">Rosauers</button>
+        </div>
+        <div class="src-row" style="color:var(--text3);font-size:11px;font-style:italic">*Prices estimated from regional market data except for scanned store</div>
       </div>
     </div>
-    <div class="loading" id="photo-loading"><div class="spinner"></div><span class="lstep active">reading image…</span></div>
-    <div class="verdict-card" id="verdict-photo">
-      <div class="verdict-top">
-        <span class="verdict-badge" id="vp-badge"></span>
-        <span class="verdict-item" id="vp-item"></span>
-        <span class="verdict-price-tag" id="vp-price"></span>
+  </div>
+
+  <!-- LISTS -->
+  <div class="panel" id="tab-lists">
+    <div class="content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.02em">Shopping Lists</div>
+        <button class="btn-sec" onclick="openAddItemModal()">+ Add item</button>
       </div>
-      <div class="verdict-analysis" id="vp-analysis"></div>
-      <div class="store-grid" id="vp-grid"></div>
-      <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic">*estimated prices based on regional market data — not verified at this store</div>
-      <div id="vp-compare" style="font-size:11px;color:var(--accent2);margin-top:6px;font-style:italic;min-height:16px"></div>
+      <div class="list-store-tabs" id="list-store-tabs">
+        <button class="lst-tab active" onclick="switchListStore('winco',this)">WinCo<span class="lst-count" id="lc-winco"></span></button>
+        <button class="lst-tab" onclick="switchListStore('walmart',this)">Walmart<span class="lst-count" id="lc-walmart"></span></button>
+        <button class="lst-tab" onclick="switchListStore('fredmeyer',this)">Fred Meyer<span class="lst-count" id="lc-fredmeyer"></span></button>
+        <button class="lst-tab" onclick="switchListStore('rosauers',this)">Rosauers<span class="lst-count" id="lc-rosauers"></span></button>
+      </div>
+      <div class="card" id="list-items-wrap"><div id="list-items-inner"></div></div>
+      <div id="list-totals" style="display:none">
+        <div class="list-totals">
+          <div class="lt-row"><span class="lt-label">Estimated total</span><span class="lt-val" id="lt-total">$0.00</span></div>
+          <div class="lt-row"><span class="lt-label">Remaining items</span><span class="lt-val" id="lt-remaining">0</span></div>
+          <div class="lt-row"><span class="lt-savings-label">Split-store savings</span><span class="lt-savings-val" id="lt-savings">—</span></div>
+        </div>
+        <div class="list-actions">
+          <button class="btn-sec" onclick="clearCheckedItems()">Clear checked</button>
+          <button class="btn-sec" onclick="startAuditFromList()">🔍 Price audit</button>
+        </div>
+      </div>
+      <div id="list-savings-banner" style="display:none" class="savings-banner">
+        <div class="sb-title">Split-store savings</div>
+        <div class="sb-headline" id="savings-headline"></div>
+        <div class="sb-detail" id="savings-detail"></div>
+      </div>
     </div>
   </div>
 
   <!-- INDEX -->
   <div class="panel" id="tab-index">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">
-      <div>
-        <div style="font-size:15px;font-weight:700">Spokane staples basket</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted)" id="index-updated">Loading…</div>
+    <div class="content">
+      <div style="margin-bottom:12px">
+        <div style="font-size:22px;font-weight:700;letter-spacing:-.02em">Staples basket</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:3px" id="index-updated">Loading…</div>
       </div>
-    </div>
-    <div class="index-table" id="index-table"></div>
-    <div class="markup-wrap">
-      <div class="markup-title">Avg markup vs. basket median</div>
-      <div id="markup-bars"></div>
+      <div class="index-table" id="index-table"></div>
+      <div class="markup-card" style="margin-top:8px">
+        <div class="markup-title">Avg markup vs. basket median</div>
+        <div id="markup-bars"></div>
+      </div>
     </div>
   </div>
 
   <!-- HISTORY -->
   <div class="panel" id="tab-history">
-    <div class="card" style="padding:0;overflow:hidden" id="history-list"></div>
-    <div style="margin-top:10px;text-align:right"><button class="btn-sec" onclick="clearHistory()">Clear</button></div>
+    <div class="content">
+      <div style="font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:16px">History</div>
+      <div class="card" id="history-list"></div>
+      <div style="margin-top:10px;text-align:right">
+        <button class="btn-sec" onclick="clearHistory()">Clear all</button>
+      </div>
+    </div>
   </div>
 
 </div>
 
+<!-- ADD ITEM MODAL -->
+<div class="modal-overlay" id="add-item-modal" onclick="closeAddItemModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeAddItemModal()">×</button>
+    <div class="modal-title">Add item to list</div>
+    <input class="modal-input" id="modal-item-name" placeholder="Item name (e.g. ground beef 80/20)" oninput="onModalNameInput()" />
+    <div class="modal-row">
+      <input class="modal-input" id="modal-item-price" type="number" step="0.01" min="0" placeholder="Target price" style="margin:0;flex:1" />
+      <input class="modal-input" id="modal-item-unit" placeholder="unit (lb, each…)" style="margin:0;flex:1" />
+    </div>
+    <div class="modal-hint" id="modal-price-hint"></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:8px">Add to store</div>
+    <div class="store-sel-wrap" id="modal-store-sel" style="margin-bottom:16px">
+      <button class="store-sel-btn active" onclick="modalSelectStore(this,'winco')">WinCo</button>
+      <button class="store-sel-btn" onclick="modalSelectStore(this,'walmart')">Walmart</button>
+      <button class="store-sel-btn" onclick="modalSelectStore(this,'fredmeyer')">Fred Meyer</button>
+      <button class="store-sel-btn" onclick="modalSelectStore(this,'rosauers')">Rosauers</button>
+    </div>
+    <button class="btn-primary" onclick="confirmAddItem()" style="margin-top:0">Add to list</button>
+  </div>
+</div>
+
+<!-- STORE PICKER -->
+<div id="store-picker-global" class="store-picker">
+  <div class="sp-opt" onclick="historyAddToStore('winco')">WinCo</div>
+  <div class="sp-opt" onclick="historyAddToStore('walmart')">Walmart</div>
+  <div class="sp-opt" onclick="historyAddToStore('fredmeyer')">Fred Meyer</div>
+  <div class="sp-opt" onclick="historyAddToStore('rosauers')">Rosauers</div>
+</div>
+
 <script>
-function getApiKey() {
-  let key = localStorage.getItem('pc_api_key') || '';
-  if (!key) {
-    key = prompt('Enter your Anthropic API key (sk-ant-...):') || '';
-    if (key) localStorage.setItem('pc_api_key', key);
-  }
-  return key;
-}
+function getApiKey(){let k=localStorage.getItem('pc_api_key')||'';if(!k){k=prompt('Enter your Anthropic API key (sk-ant-...):') ||'';if(k)localStorage.setItem('pc_api_key',k);}return k;}
+
 // ── Config ──────────────────────────────────────────────────────────────────
-// Option A: your deployed pipeline server (Railway, Render, etc.)
-const PRICE_API_URL = localStorage.getItem('pc_api_url') || null;
+const PRICE_API_URL   = localStorage.getItem('pc_api_url')||null;
+const PRICES_JSON_URL = localStorage.getItem('pc_json_url')||'https://raw.githubusercontent.com/dtruitt1/pricecheck-spokane/main/pipeline/prices.json';
 
-// Option B: raw URL to prices.json committed in your GitHub repo
-// e.g. 'https://raw.githubusercontent.com/YOU/pricecheck/main/pipeline/prices.json'
-const PRICES_JSON_URL = localStorage.getItem('pc_json_url') || 'https://raw.githubusercontent.com/dtruitt1/pricecheck-spokane/main/pipeline/prices.json';
+// ── State ────────────────────────────────────────────────────────────────────
+let priceBasket=null, priceLoadedAt=null, selectedUnit='lb';
+let imgBase64=null, imgMime='image/jpeg';
+let barcodeReader=null, currentUPCProduct=null, currentStore='winco';
+let history=[];
+try{history=JSON.parse(localStorage.getItem('pc_history_v3')||'[]');}catch(e){}
 
-// ── State ───────────────────────────────────────────────────────────────────
-let priceBasket = null;   // { item_key: { walmart: {price,observed_at}, winco: {...}, fredmeyer: {...} } }
-let priceLoadedAt = null;
-let selectedUnit = 'lb';
-let imgBase64 = null, imgMime = 'image/jpeg';
-let barcodeReader = null;
-let currentUPCProduct = null;
-let history = [];
-try { history = JSON.parse(localStorage.getItem('pc_history_v3') || '[]'); } catch(e){}
+// ── Lists state ──────────────────────────────────────────────────────────────
+const STORES=['winco','walmart','fredmeyer','rosauers'];
+const STORE_NAMES={winco:'WinCo',walmart:'Walmart',fredmeyer:'Fred Meyer',rosauers:'Rosauers'};
+let lists={winco:{items:[]},walmart:{items:[]},fredmeyer:{items:[]},rosauers:{items:[]}};
+try{lists=JSON.parse(localStorage.getItem('pc_lists')||JSON.stringify(lists));}catch(e){}
+STORES.forEach(s=>{if(!lists[s])lists[s]={items:[]};});
+let activeListStore='winco', modalStore='winco', pendingObs=[], pickerHistoryIdx=null;
+try{pendingObs=JSON.parse(localStorage.getItem('pc_pending_obs')||'[]');}catch(e){}
+let lastVerdicts={};
 
-// Fallback hardcoded estimates (used when no live data available)
-const FALLBACK = {
-  milk_whole_gallon:    { item_name:'Whole milk',           unit:'gal',     walmart:{price:3.48},fredmeyer:{price:4.29},winco:{price:3.18} },
-  eggs_large_dozen:     { item_name:'Large eggs',           unit:'doz',     walmart:{price:5.98},fredmeyer:{price:6.49},winco:{price:5.48} },
-  ground_beef_8020_lb:  { item_name:'Ground beef 80/20',    unit:'lb',      walmart:{price:4.98},fredmeyer:{price:5.99},winco:{price:4.48} },
-  chicken_breast_lb:    { item_name:'Boneless chicken',     unit:'lb',      walmart:{price:2.98},fredmeyer:{price:3.99},winco:{price:2.78} },
-  bread_white_loaf:     { item_name:'White bread',          unit:'loaf',    walmart:{price:2.28},fredmeyer:{price:3.49},winco:{price:1.98} },
-  butter_salted_lb:     { item_name:'Butter, salted',       unit:'lb',      walmart:{price:4.48},fredmeyer:{price:5.29},winco:{price:3.98} },
-  cheddar_cheese_lb:    { item_name:'Cheddar cheese',       unit:'lb',      walmart:{price:4.98},fredmeyer:{price:5.49},winco:{price:4.28} },
-  bananas_lb:           { item_name:'Bananas',              unit:'lb',      walmart:{price:0.49},fredmeyer:{price:0.59},winco:{price:0.39} },
-  potatoes_russet_5lb:  { item_name:'Russet potatoes',      unit:'5 lb bag',walmart:{price:3.98},fredmeyer:{price:4.49},winco:{price:3.48} },
-  toilet_paper_12pk:    { item_name:'Toilet paper',         unit:'12-ct',   walmart:{price:9.97},fredmeyer:{price:12.49},winco:{price:8.98}},
-  paper_towels_6pk:     { item_name:'Paper towels',         unit:'6-ct',    walmart:{price:8.97},fredmeyer:{price:11.49},winco:{price:7.98}},
-  pasta_spaghetti_16oz: { item_name:'Spaghetti pasta',      unit:'16 oz',   walmart:{price:1.28},fredmeyer:{price:1.99},winco:{price:0.98} },
-  canola_oil_48oz:      { item_name:'Canola oil',           unit:'48 oz',   walmart:{price:4.98},fredmeyer:{price:5.99},winco:{price:4.28} },
-  orange_juice_52oz:    { item_name:'Orange juice',         unit:'52 oz',   walmart:{price:4.48},fredmeyer:{price:5.29},winco:{price:3.98} },
+function saveLists(){try{localStorage.setItem('pc_lists',JSON.stringify(lists));}catch(e){}}
+function savePendingObs(){try{localStorage.setItem('pc_pending_obs',JSON.stringify(pendingObs));}catch(e){}}
+
+// ── Fallback prices ──────────────────────────────────────────────────────────
+const FALLBACK={
+  milk_whole_gallon:   {item_name:'Whole milk',unit:'gal',walmart:{price:3.48},fredmeyer:{price:4.29},winco:{price:3.18},rosauers:{price:3.19}},
+  eggs_large_dozen:    {item_name:'Large eggs',unit:'doz',walmart:{price:2.46},fredmeyer:{price:3.99},winco:{price:2.98},rosauers:{price:1.79}},
+  ground_beef_8020_lb: {item_name:'Ground beef 80/20',unit:'lb',walmart:{price:7.43},fredmeyer:{price:8.99},winco:{price:4.48},rosauers:{price:6.99}},
+  chicken_breast_lb:   {item_name:'Boneless chicken',unit:'lb',walmart:{price:2.57},fredmeyer:{price:2.89},winco:{price:2.78},rosauers:{price:5.49}},
+  bread_white_loaf:    {item_name:'White bread',unit:'loaf',walmart:{price:1.48},fredmeyer:{price:2.49},winco:{price:1.98},rosauers:{price:2.69}},
+  butter_salted_lb:    {item_name:'Butter, salted',unit:'lb',walmart:{price:2.85},fredmeyer:{price:6.99},winco:{price:3.98},rosauers:{price:4.79}},
+  cheddar_cheese_lb:   {item_name:'Cheddar cheese',unit:'lb',walmart:{price:3.58},fredmeyer:{price:2.33},winco:{price:4.28},rosauers:{price:3.99}},
+  bananas_lb:          {item_name:'Bananas',unit:'lb',walmart:{price:0.50},fredmeyer:{price:0.55},winco:{price:0.39},rosauers:{price:0.79}},
+  potatoes_russet_5lb: {item_name:'Russet potatoes',unit:'5 lb bag',walmart:{price:2.14},fredmeyer:{price:1.29},winco:{price:3.48},rosauers:{price:2.99}},
+  toilet_paper_12pk:   {item_name:'Toilet paper',unit:'12-ct',walmart:{price:9.98},fredmeyer:{price:6.79},winco:{price:8.98},rosauers:{price:5.99}},
+  paper_towels_6pk:    {item_name:'Paper towels',unit:'6-ct',walmart:{price:12.96},fredmeyer:{price:14.99},winco:{price:7.98},rosauers:{price:8.99}},
+  pasta_spaghetti_16oz:{item_name:'Spaghetti pasta',unit:'16 oz',walmart:{price:0.98},fredmeyer:{price:1.25},winco:{price:0.98},rosauers:{price:1.99}},
+  canola_oil_48oz:     {item_name:'Canola oil',unit:'48 oz',walmart:{price:3.76},fredmeyer:{price:4.29},winco:{price:4.28},rosauers:{price:5.99}},
+  orange_juice_52oz:   {item_name:'Orange juice',unit:'52 oz',walmart:{price:4.46},fredmeyer:{price:1.50},winco:{price:3.98},rosauers:{price:4.69}},
 };
 
-// ── Price data loading ───────────────────────────────────────────────────────
-async function loadPriceData() {
-  try {
-    if (PRICE_API_URL) {
-      const r = await fetch(`${PRICE_API_URL}/api/prices`);
-      const d = await r.json();
-      priceBasket = d.basket;
-      priceLoadedAt = d.updated_at;
-      setSyncBadge(true, priceLoadedAt);
-      return;
-    }
-    if (PRICES_JSON_URL) {
-      const r = await fetch(PRICES_JSON_URL);
-      const d = await r.json();
-      // Normalize flat array → basket object
-      priceBasket = {};
-      for (const row of (d.prices || [])) {
-        if (!priceBasket[row.item_key]) priceBasket[row.item_key] = { item_name: row.item_name, unit: row.unit };
-        priceBasket[row.item_key][row.store] = { price: row.price, observed_at: row.observed_at, source: row.source };
-      }
-      priceLoadedAt = d.updated_at;
-      setSyncBadge(true, priceLoadedAt);
-      return;
-    }
-  } catch(e) {
-    console.warn('Could not load live prices:', e.message);
-  }
-  // Fall back to hardcoded estimates
-  priceBasket = FALLBACK;
-  setSyncBadge(false, null);
+// ── Price loading ────────────────────────────────────────────────────────────
+async function loadPriceData(){
+  try{
+    if(PRICE_API_URL){const r=await fetch(`${PRICE_API_URL}/api/prices`);const d=await r.json();priceBasket=d.basket;priceLoadedAt=d.updated_at;setSyncBadge(true,priceLoadedAt);return;}
+    if(PRICES_JSON_URL){const r=await fetch(PRICES_JSON_URL);const d=await r.json();priceBasket={};for(const row of(d.prices||[])){if(!priceBasket[row.item_key])priceBasket[row.item_key]={item_name:row.item_name,unit:row.unit};priceBasket[row.item_key][row.store]={price:row.price,observed_at:row.observed_at,source:row.source};}priceLoadedAt=d.updated_at;setSyncBadge(true,priceLoadedAt);return;}
+  }catch(e){console.warn('Price load failed:',e.message);}
+  priceBasket=FALLBACK; setSyncBadge(false,null);
+}
+function setSyncBadge(live,updatedAt){
+  const pill=document.getElementById('sync-pill'),lbl=document.getElementById('sync-label');
+  if(live&&updatedAt){pill.className='sync-pill';lbl.textContent='Live · '+new Date(updatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+  else{pill.className='sync-pill est';lbl.textContent='Estimated';}
+}
+function buildBasketContext(){
+  const b=priceBasket||FALLBACK;
+  return Object.entries(b).map(([,item])=>{
+    const s=['walmart','fredmeyer','winco','rosauers'].map(s=>item[s]?`${s} $${item[s].price.toFixed(2)}`:null).filter(Boolean).join(', ');
+    return s?`${item.item_name} (${item.unit}): ${s}`:null;
+  }).filter(Boolean).join('\n');
+}
+function isLiveData(){return priceBasket!==FALLBACK&&priceLoadedAt;}
+function fuzzyMatchItemKey(name){
+  if(!name)return null; const n=name.toLowerCase(); const b=priceBasket||FALLBACK;
+  for(const[key,item]of Object.entries(b)){if(item.item_name&&n.includes(item.item_name.toLowerCase().split(' ')[0]))return key;if(n.includes(key.split('_')[0]))return key;}
+  return null;
+}
+function getBestPrice(item_key,store){const b=priceBasket||FALLBACK;return b[item_key]?.[store]?.price||null;}
+function getObservedAt(item_key,store){const b=priceBasket||FALLBACK;return b[item_key]?.[store]?.observed_at||null;}
+
+// ── Claude calls ─────────────────────────────────────────────────────────────
+async function callClaudeVerdict(item,price,unit,store){
+  const ctx=buildBasketContext(),storeCtx=store?`User found this at: ${store}. `:'',dataNote=isLiveData()?`(updated: ${priceLoadedAt})`:'(estimated)';
+  const prompt=`You are a grocery price intelligence engine for Spokane / Colbert, WA.\n\nSPOKANE BASKET ${dataNote}:\n${ctx}\n\nStore markup context:\n- WinCo: ~10-15% below median.\n- Walmart: ~0-5% above median.\n- Fred Meyer: ~15-25% above median.\n- Rosauers: ~20-30% above median.\n\nITEM: ${item} at $${price} per ${unit}. ${storeCtx}\n\nRespond ONLY with valid JSON, no markdown:\n{"verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences. Mention specific Spokane price range, which store is cheapest, and whether to buy now or look elsewhere.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},{"store":"Rosauers","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}`;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+  const data=await resp.json(); if(data.error)throw new Error(data.error.message);
+  const text=(data.content[0]?.text||'').replace(/```json|```/g,'').trim();
+  const m=text.match(/\{[\s\S]*\}/); if(!m)throw new Error('No JSON'); return JSON.parse(m[0]);
 }
 
-function setSyncBadge(isLive, updatedAt) {
-  const dot = document.getElementById('sync-dot');
-  const lbl = document.getElementById('sync-label');
-  if (isLive && updatedAt) {
-    dot.classList.add('live');
-    const d = new Date(updatedAt);
-    lbl.textContent = 'live · ' + d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
-  } else {
-    dot.classList.remove('live');
-    lbl.textContent = 'estimated data';
-  }
-}
-
-// ── Basket context builder ────────────────────────────────────────────────────
-function buildBasketContext() {
-  const basket = priceBasket || FALLBACK;
-  const lines = [];
-  for (const [key, item] of Object.entries(basket)) {
-    const stores = ['walmart','fredmeyer','winco']
-      .map(s => item[s] ? `${s} $${item[s].price.toFixed(2)}` : null)
-      .filter(Boolean).join(', ');
-    if (stores) lines.push(`${item.item_name} (${item.unit}): ${stores}`);
-  }
-  return lines.join('\n');
-}
-
-function isLiveData() {
-  return priceBasket !== FALLBACK && priceLoadedAt;
-}
-
-// ── Claude verdict call ───────────────────────────────────────────────────────
-async function callClaudeVerdict(item, price, unit, store) {
-  const basketCtx = buildBasketContext();
-  const storeCtx  = store ? `User found this at: ${store}. ` : '';
-  const dataNote  = isLiveData() ? `(Price data last updated: ${priceLoadedAt})` : '(Using estimated baseline prices)';
-
-  const prompt = `You are a grocery price intelligence engine for Spokane / Colbert, WA.
-
-SPOKANE STAPLES BASKET ${dataNote}:
-${basketCtx}
-
-Store markup context:
-- WinCo: ~10-15% below median. No frills warehouse.
-- Walmart: ~0-5% above median.
-- Fred Meyer (Kroger): ~15-25% above median.
-- Rosauers: ~20-30% above median.
-
-ITEM: ${item} at $${price} per ${unit}. ${storeCtx}
-
-Respond ONLY with valid JSON, no markdown:
-{
-  "verdict": "GOOD"|"FAIR"|"HIGH",
-  "verdict_class": "good"|"fair"|"high",
-  "analysis": "2-3 sentences. Mention specific Spokane price range, which store is cheapest for this item, and whether the user should buy now or look elsewhere.",
-  "store_prices": [
-    {"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},
-    {"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"},
-    {"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"live"|"estimated"}
-  ],
-  "range_low": 0.00,
-  "range_high": 0.00,
-  "your_price_pct": 0
-}`;
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': getApiKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  const data = await resp.json();
-  if (data.error) throw new Error(data.error.message);
-  const text = (data.content[0]?.text || '').replace(/```json|```/g,'').trim();
-  const m = text.match(/\{[\s\S]*\}/);
-  if (!m) throw new Error('No JSON in response');
-  return JSON.parse(m[0]);
+async function callClaudeVerify(expectedItem,base64,mime){
+  const prompt=`You are verifying a grocery item for a shopping list app.\n\nExpected item: "${expectedItem.name}" (${expectedItem.unit||'unspecified unit'})\n${expectedItem.target_price?`Expected price: $${expectedItem.target_price.toFixed(2)}`:''}Store: ${STORE_NAMES[activeListStore]||activeListStore}\n\nLook at this price tag image. Return ONLY JSON:\n{"match":true|false,"match_reason":null or "why product does NOT match (wrong fat%, wrong size, etc)","item_found":"exact product name on tag","shelf_price":0.00,"sale_price":null or 0.00,"sale_type":null|"member"|"weekly_ad"|"clearance","sale_end_date":null or "date","unit":"lb|oz|each|gal|ct","confidence":"high"|"medium"|"low"}\n\nRULES:\n- shelf_price = regular price BEFORE any discounts\n- sale_price = discounted/member price if visible\n- match=false if product spec differs from expected\n- If only sale price visible, set shelf_price=null`;
+  const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mime,data:base64}},{type:'text',text:prompt}]}]})});
+  const data=await resp.json(); if(data.error)throw new Error(data.error.message);
+  const text=(data.content[0]?.text||'').replace(/```json|```/g,'').trim();
+  const m=text.match(/\{[\s\S]*\}/); if(!m)throw new Error('No JSON'); return JSON.parse(m[0]);
 }
 
 // ── Render verdict ────────────────────────────────────────────────────────────
-function renderVerdict(cardId, result, item, price, unit) {
-  const card = document.getElementById(cardId);
-  card.className = 'verdict-card show ' + result.verdict_class;
-  const p = { 'verdict-main':'vm', 'verdict-barcode':'vb', 'verdict-photo':'vp' }[cardId];
-  document.getElementById(p+'-badge').textContent = result.verdict;
-  document.getElementById(p+'-item').textContent = item;
-  document.getElementById(p+'-price').textContent = '$'+parseFloat(price).toFixed(2)+' / '+unit;
-  document.getElementById(p+'-analysis').textContent = result.analysis;
-  document.getElementById(p+'-grid').innerHTML = (result.store_prices||[]).map(s=>
-    `<div class="store-pill">
-      <div class="store-name">${s.store}</div>
-      <div class="store-price-val ${s.tier}">${s.price}</div>
-      <div class="store-source">${s.source==='you are here' ? 'you are here' : 'estimated*'}</div>
-    </div>`
-  ).join('');
+function renderVerdict(cardId,result,item,price,unit){
+  const card=document.getElementById(cardId); card.className='verdict-card show';
+  const p={  'verdict-main':'vm','verdict-barcode':'vb','verdict-photo':'vp'}[cardId];
+  const vc=result.verdict_class;
 
-  // Store comparison one-liner for FAIR or HIGH verdicts
-  if (result.verdict_class === 'fair' || result.verdict_class === 'high') {
-    const basket = priceBasket || FALLBACK;
-    const stores = { winco: 0, walmart: 0, fredmeyer: 0, rosauers: 0 };
-    const counts = { winco: 0, walmart: 0, fredmeyer: 0, rosauers: 0 };
-    Object.values(basket).forEach(item => {
-      const prices = Object.keys(stores).map(s => item[s]?.price).filter(Boolean);
-      if (prices.length < 2) return;
-      const med = [...prices].sort((a,b)=>a-b)[Math.floor(prices.length/2)];
-      Object.keys(stores).forEach(s => {
-        if (item[s]?.price) { stores[s] += (item[s].price - med) / med * 100; counts[s]++; }
-      });
-    });
-    const avgs = Object.keys(stores)
-      .filter(s => counts[s] > 0)
-      .map(s => ({ store: s, pct: stores[s] / counts[s] }))
-      .sort((a,b) => a.pct - b.pct);
-    if (avgs.length >= 2) {
-      const cheapest = avgs[0];
-      const storeNames = { winco: 'WinCo', walmart: 'Walmart', fredmeyer: 'Fred Meyer', rosauers: 'Rosauers' };
-      const diff = Math.abs(avgs[avgs.length-1].pct - cheapest.pct).toFixed(0);
-      const el = document.getElementById(p+'-compare');
-      if (el) el.textContent = `💡 ${storeNames[cheapest.store]} runs ~${diff}% cheaper than ${storeNames[avgs[avgs.length-1].store]} on staples overall.`;
-    }
-  } else {
-    const el = document.getElementById(p+'-compare');
-    if (el) el.textContent = '';
-  }
-  if (cardId === 'verdict-main') {
-    const pct = Math.max(2, Math.min(98, result.your_price_pct||50));
-    const col = result.verdict_class==='good'?'var(--accent)':result.verdict_class==='fair'?'var(--warn)':'var(--danger)';
-    document.getElementById('vm-lo').textContent = '$'+(result.range_low||0).toFixed(2);
-    document.getElementById('vm-hi').textContent = '$'+(result.range_high||0).toFixed(2);
+  document.getElementById(p+'-hero').className='verdict-hero '+vc;
+  document.getElementById(p+'-label').className='verdict-label '+vc;
+  document.getElementById(p+'-label').textContent=vc==='good'?'Good price':vc==='fair'?'Fair price':'High price';
+  document.getElementById(p+'-item').textContent=item;
+  const priceEl=document.getElementById(p+'-price');
+  priceEl.className='verdict-price-main '+vc;
+  priceEl.innerHTML=`$${parseFloat(price).toFixed(2)} <span class="unit">/ ${unit}</span>`;
+  document.getElementById(p+'-analysis').textContent=result.analysis;
+
+  // Store rows
+  const storesEl=document.getElementById(p+'-stores');
+  storesEl.innerHTML=(result.store_prices||[]).map(s=>{
+    const badge=s.tier==='best'?'<span class="store-row-badge best">Cheapest</span>':s.tier==='high'?'<span class="store-row-badge high">Highest</span>':s.source==='you are here'?'<span class="store-row-badge here">You are here</span>':'';
+    const priceClass=s.tier==='best'?' best':s.tier==='high'?' high':'';
+    return`<div class="store-row"><div class="store-row-name">${s.store}</div>${badge}<div class="store-row-price${priceClass}">${s.price}</div></div>`;
+  }).join('');
+
+  lastVerdicts[p]={item,price,unit};
+
+  // Bar (only on main)
+  if(cardId==='verdict-main'){
+    const pct=Math.max(2,Math.min(98,result.your_price_pct||50));
+    document.getElementById('vm-lo').textContent='$'+(result.range_low||0).toFixed(2)+' low';
+    document.getElementById('vm-hi').textContent='$'+(result.range_high||0).toFixed(2)+' high';
     setTimeout(()=>{
-      document.getElementById('vm-fill').style.cssText = `width:${pct}%;background:${col}`;
-      document.getElementById('vm-marker').style.left = pct+'%';
-    }, 100);
-    const live = isLiveData();
-    document.getElementById('vm-src-dot').className = 'sync-dot'+(live?' live':'');
-    document.getElementById('vm-src-label').textContent = live ? 'live price data · '+new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'estimated baseline';
+      document.getElementById('vm-fill').className='bar-fill '+vc;
+      document.getElementById('vm-fill').style.width=pct+'%';
+      document.getElementById('vm-thumb').className='bar-thumb '+vc;
+      document.getElementById('vm-thumb').style.left=pct+'%';
+    },100);
+    const live=isLiveData();
+    const srcEl=document.getElementById('vm-src');
+    srcEl.innerHTML=`<div class="sync-dot" style="background:${live?'var(--good)':'var(--fair)'}"></div>${live?'Live price data · '+new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'Estimated baseline'}`;
+  }
+
+  // Compare + ATL
+  const compareEl=document.getElementById(p+'-compare');
+  const atlEl=document.getElementById(p+'-atl');
+  if(vc==='fair'||vc==='high'){
+    const b=priceBasket||FALLBACK,st={winco:0,walmart:0,fredmeyer:0,rosauers:0},ct={...st};
+    Object.values(b).forEach(it=>{
+      const prices=Object.keys(st).map(s=>it[s]?.price).filter(Boolean);
+      if(prices.length<2)return;
+      const med=[...prices].sort((a,b)=>a-b)[Math.floor(prices.length/2)];
+      Object.keys(st).forEach(s=>{if(it[s]?.price){st[s]+=(it[s].price-med)/med*100;ct[s]++;}});
+    });
+    const avgs=Object.keys(st).filter(s=>ct[s]>0).map(s=>({store:s,pct:st[s]/ct[s]})).sort((a,b)=>a.pct-b.pct);
+    if(avgs.length>=2){
+      const diff=Math.abs(avgs[avgs.length-1].pct-avgs[0].pct).toFixed(0);
+      compareEl.textContent=`💡 ${STORE_NAMES[avgs[0].store]} runs ~${diff}% cheaper than ${STORE_NAMES[avgs[avgs.length-1].store]} on staples overall.`;
+      compareEl.style.display='block';
+    }
+    if(atlEl)atlEl.className='atl-row show';
+  }else{
+    compareEl.style.display='none';
+    if(atlEl)atlEl.className='atl-row';
   }
 }
 
-function saveHistory(item, price, unit, store, result, src) {
-  history.unshift({ item, price, unit, store:store||'—', verdict:result.verdict, verdict_class:result.verdict_class, analysis:result.analysis, source:src||'manual', date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}) });
-  if (history.length>100) history=history.slice(0,100);
-  try{ localStorage.setItem('pc_history_v3',JSON.stringify(history)); }catch(e){}
+function saveHistory(item,price,unit,store,result,src){
+  history.unshift({item,price,unit,store:store||'—',verdict:result.verdict,verdict_class:result.verdict_class,analysis:result.analysis,source:src||'manual',date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'})});
+  if(history.length>100)history=history.slice(0,100);
+  try{localStorage.setItem('pc_history_v3',JSON.stringify(history));}catch(e){}
 }
 
-// ── Steps helper ─────────────────────────────────────────────────────────────
-function setStep(n) {
-  ['ls0','ls1','ls2'].forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(!el)return;
-    el.className='lstep'+(i<n?' done':i===n?' active':'');
-  });
-}
+function setStep(n){['ls0','ls1','ls2'].forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;el.className='load-step'+(i<n?' done':i===n?' active':'');});}
 
 // ── Manual check ──────────────────────────────────────────────────────────────
-async function runCheck() {
-  const item  = document.getElementById('item-name').value.trim();
-  const price = parseFloat(document.getElementById('item-price').value);
-  const store = document.getElementById('item-store').value.trim();
-  if (!item || isNaN(price) || price<=0) { alert('Enter item name and price.'); return; }
+async function runCheck(){
+  const item=document.getElementById('item-name').value.trim();
+  const price=parseFloat(document.getElementById('item-price').value);
+  const store=document.getElementById('item-store').value.trim();
+  if(!item||isNaN(price)||price<=0){alert('Enter item name and price.');return;}
   document.getElementById('verdict-main').classList.remove('show');
   document.getElementById('check-loading').classList.add('show');
-  document.getElementById('check-btn').disabled = true;
-  setStep(0); setTimeout(()=>setStep(1),700); setTimeout(()=>setStep(2),1800);
-  try {
-    const result = await callClaudeVerdict(item, price, selectedUnit, store);
-    document.getElementById('check-loading').classList.remove('show');
-    renderVerdict('verdict-main', result, item, price, selectedUnit);
-    saveHistory(item, price, selectedUnit, store, result, 'manual');
-  } catch(e) {
-    document.getElementById('check-loading').classList.remove('show');
-    alert('Error: '+e.message);
-  }
-  document.getElementById('check-btn').disabled = false;
+  document.getElementById('check-btn').disabled=true;
+  setStep(0);setTimeout(()=>setStep(1),700);setTimeout(()=>setStep(2),1800);
+  try{const result=await callClaudeVerdict(item,price,selectedUnit,store);document.getElementById('check-loading').classList.remove('show');renderVerdict('verdict-main',result,item,price,selectedUnit);saveHistory(item,price,selectedUnit,store,result,'manual');}
+  catch(e){document.getElementById('check-loading').classList.remove('show');alert('Error: '+e.message);}
+  document.getElementById('check-btn').disabled=false;
 }
 
 // ── Barcode ───────────────────────────────────────────────────────────────────
-async function startScanner() {
-  document.getElementById('scan-status').textContent = 'Starting camera…';
-  document.getElementById('start-btn').style.display = 'none';
-  document.getElementById('stop-btn').style.display = 'block';
-  try {
-    const hints = new Map();
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.CODE_128]);
-    barcodeReader = new ZXing.BrowserMultiFormatReader(hints);
-    await barcodeReader.decodeFromVideoDevice(undefined, document.getElementById('barcode-video'), async(result,err)=>{
-      if (!result) return;
-      const flash = document.getElementById('scan-flash');
-      flash.style.opacity='.5'; setTimeout(()=>flash.style.opacity='0',200);
-      document.getElementById('scan-status').textContent = 'Found: '+result.getText();
-      stopScanner();
-      await lookupUPC(result.getText());
+async function startScanner(){
+  document.getElementById('scan-status').textContent='Starting camera…';
+  document.getElementById('start-btn').style.display='none';document.getElementById('stop-btn').style.display='block';
+  try{
+    const hints=new Map();hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.CODE_128]);
+    barcodeReader=new ZXing.BrowserMultiFormatReader(hints);
+    await barcodeReader.decodeFromVideoDevice(undefined,document.getElementById('barcode-video'),async(result,err)=>{
+      if(!result)return;
+      const flash=document.getElementById('scan-flash');flash.style.opacity='.6';setTimeout(()=>flash.style.opacity='0',200);
+      document.getElementById('scan-status').textContent='Found: '+result.getText();
+      stopScanner();await lookupUPC(result.getText());
     });
-    document.getElementById('scan-status').textContent = 'Point at a barcode…';
-  } catch(e) {
-    document.getElementById('scan-status').textContent = 'Camera error: '+e.message;
-    document.getElementById('start-btn').style.display = 'block';
-    document.getElementById('stop-btn').style.display = 'none';
-  }
+    document.getElementById('scan-status').textContent='Point at a barcode…';
+  }catch(e){document.getElementById('scan-status').textContent='Camera error: '+e.message;document.getElementById('start-btn').style.display='block';document.getElementById('stop-btn').style.display='none';}
 }
-function stopScanner() {
-  if (barcodeReader) { try{barcodeReader.reset();}catch(e){} barcodeReader=null; }
-  document.getElementById('start-btn').style.display='block';
-  document.getElementById('stop-btn').style.display='none';
-}
-async function lookupUPC(upc) {
-  if (!upc||upc.length<8){alert('Enter a valid UPC.');return;}
-  document.getElementById('upc-result').classList.remove('show');
-  document.getElementById('verdict-barcode').classList.remove('show');
-  document.getElementById('barcode-loading').classList.add('show');
-  document.getElementById('bl-text').textContent='looking up '+upc+'…';
-  try {
-    const r = await fetch(`https://world.openfoodfacts.org/api/v3/product/${upc}.json`);
-    const d = await r.json();
-    let name='',brand='',size='';
-    if (d.status==='success'&&d.product){
-      const p=d.product; name=p.product_name_en||p.product_name||''; brand=p.brands||''; size=p.quantity||'';
-    }
-    if (!name) name='UPC '+upc;
-    currentUPCProduct={ upc, name, brand, size };
-    document.getElementById('upc-name').textContent = name||'Unknown product';
-    document.getElementById('upc-brand').textContent = [brand,size].filter(Boolean).join(' · ')||'Unknown brand';
-    document.getElementById('upc-result').classList.add('show');
-  } catch(e) { alert('Lookup error: '+e.message); }
+function stopScanner(){if(barcodeReader){try{barcodeReader.reset();}catch(e){}barcodeReader=null;}document.getElementById('start-btn').style.display='block';document.getElementById('stop-btn').style.display='none';}
+async function lookupUPC(upc){
+  if(!upc||upc.length<8){alert('Enter a valid UPC.');return;}
+  document.getElementById('upc-result').style.display='none';document.getElementById('verdict-barcode').classList.remove('show');
+  document.getElementById('barcode-loading').classList.add('show');document.getElementById('bl-text').textContent='Looking up '+upc+'…';
+  try{
+    const r=await fetch(`https://world.openfoodfacts.org/api/v3/product/${upc}.json`);const d=await r.json();
+    let name='',brand='',size='';if(d.status==='success'&&d.product){const p=d.product;name=p.product_name_en||p.product_name||'';brand=p.brands||'';size=p.quantity||'';}
+    if(!name)name='UPC '+upc;
+    currentUPCProduct={upc,name,brand,size};
+    document.getElementById('upc-name').textContent=name;document.getElementById('upc-brand').textContent=[brand,size].filter(Boolean).join(' · ')||'Unknown brand';
+    document.getElementById('upc-result').style.display='block';
+  }catch(e){alert('Lookup error: '+e.message);}
   document.getElementById('barcode-loading').classList.remove('show');
 }
-async function runUPCCheck() {
-  if (!currentUPCProduct) return;
-  const price = parseFloat(document.getElementById('upc-price').value);
-  const store = document.getElementById('upc-store').value.trim();
-  if (isNaN(price)||price<=0){alert('Enter the shelf price.');return;}
+async function runUPCCheck(){
+  if(!currentUPCProduct)return;
+  const price=parseFloat(document.getElementById('upc-price').value);
+  const store=document.getElementById('upc-store').value.trim();
+  if(isNaN(price)||price<=0){alert('Enter the shelf price.');return;}
   document.getElementById('verdict-barcode').classList.remove('show');
-  document.getElementById('barcode-loading').classList.add('show');
-  document.getElementById('bl-text').textContent='analyzing price…';
+  document.getElementById('barcode-loading').classList.add('show');document.getElementById('bl-text').textContent='Analyzing price…';
   const item=[currentUPCProduct.brand,currentUPCProduct.name].filter(Boolean).join(' ');
   const unit=currentUPCProduct.size||'each';
-  try {
-    const result = await callClaudeVerdict(item, price, unit, store);
-    document.getElementById('barcode-loading').classList.remove('show');
-    renderVerdict('verdict-barcode', result, item, price, unit);
-    saveHistory(item, price, unit, store, result, 'barcode');
-  } catch(e) { document.getElementById('barcode-loading').classList.remove('show'); alert('Error: '+e.message); }
+  try{const result=await callClaudeVerdict(item,price,unit,store);document.getElementById('barcode-loading').classList.remove('show');renderVerdict('verdict-barcode',result,item,price,unit);saveHistory(item,price,unit,store,result,'barcode');}
+  catch(e){document.getElementById('barcode-loading').classList.remove('show');alert('Error: '+e.message);}
 }
 
 // ── Photo ─────────────────────────────────────────────────────────────────────
-function handleImg(input) {
-  const file=input.files[0]; if(!file)return;
-  imgMime=file.type||'image/jpeg';
-  const r=new FileReader();
-  r.onload=e=>{
-    imgBase64=e.target.result.split(',')[1];
-    document.getElementById('preview-img').src=e.target.result;
-    document.getElementById('preview-img').style.display='block';
-    document.getElementById('photo-btn').disabled=false;
-  };
-  r.readAsDataURL(file);
+function handleImg(input){
+  const file=input.files[0];if(!file)return;imgMime=file.type||'image/jpeg';
+  const r=new FileReader();r.onload=e=>{imgBase64=e.target.result.split(',')[1];document.getElementById('preview-img').src=e.target.result;document.getElementById('preview-img').style.display='block';document.getElementById('photo-btn').disabled=false;};r.readAsDataURL(file);
 }
-let currentStore = 'winco';
-function selectStore(btn, store) {
-  document.querySelectorAll('.store-sel-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentStore = store;
-}
-async function runPhoto() {
-  if (!imgBase64) return;
-  document.getElementById('verdict-photo').classList.remove('show');
-  document.getElementById('photo-loading').classList.add('show');
-  document.getElementById('photo-btn').disabled=true;
-  const basketCtx=buildBasketContext();
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',max_tokens:1500,
-        messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:imgMime,data:imgBase64}},
-          {type:'text',text:`Grocery price intelligence for Spokane, WA. Read this image (price tag, shelf label, receipt).
-
-SPOKANE STAPLES:
-${basketCtx}
-
-The user is currently shopping at: ${currentStore}
-
-Extract item/price/unit from the image. Return ONLY JSON:
-{"item":"...","price":0.00,"unit":"lb|oz|each|gal","verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences for Spokane area.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}
-
-IMPORTANT: For the store matching "${currentStore}", use the scanned price and set source to "you are here" instead of estimated.`}
-        ]}]
-      })
-    });
-    const data=await resp.json();
-    if(data.error)throw new Error(data.error.message);
+function selectStore(btn,store){document.querySelectorAll('.store-sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentStore=store;}
+async function runPhoto(){
+  if(!imgBase64)return;
+  document.getElementById('verdict-photo').classList.remove('show');document.getElementById('photo-loading').classList.add('show');document.getElementById('photo-btn').disabled=true;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imgMime,data:imgBase64}},{type:'text',text:`Grocery price intelligence for Spokane, WA.\n\nSPOKANE STAPLES:\n${buildBasketContext()}\n\nUser is at: ${currentStore}\n\nRead this price tag image. Return ONLY JSON:\n{"item":"...","price":0.00,"unit":"lb|oz|each|gal","verdict":"GOOD"|"FAIR"|"HIGH","verdict_class":"good"|"fair"|"high","analysis":"2-3 sentences for Spokane.","store_prices":[{"store":"WinCo","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Walmart","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Fred Meyer","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"},{"store":"Rosauers","price":"$X.XX","tier":"best"|"mid"|"high","source":"estimated"}],"range_low":0.00,"range_high":0.00,"your_price_pct":0}\n\nFor store "${currentStore}", use the scanned price and set source to "you are here".`}]}]})});
+    const data=await resp.json();if(data.error)throw new Error(data.error.message);
     const text=(data.content[0]?.text||'').replace(/```json|```/g,'').trim();
-    const m=text.match(/\{[\s\S]*\}/); if(!m)throw new Error('No JSON');
-    const result=JSON.parse(m[0]);
-    document.getElementById('photo-loading').classList.remove('show');
-    renderVerdict('verdict-photo',result,result.item,result.price,result.unit);
-    saveHistory(result.item,result.price,result.unit,currentStore,result,'photo');
-  } catch(e){ document.getElementById('photo-loading').classList.remove('show'); alert('Error: '+e.message); }
+    const m=text.match(/\{[\s\S]*\}/);if(!m)throw new Error('No JSON');const result=JSON.parse(m[0]);
+    document.getElementById('photo-loading').classList.remove('show');renderVerdict('verdict-photo',result,result.item,result.price,result.unit);saveHistory(result.item,result.price,result.unit,currentStore,result,'photo');
+  }catch(e){document.getElementById('photo-loading').classList.remove('show');alert('Error: '+e.message);}
   document.getElementById('photo-btn').disabled=false;
 }
 
-// ── Index tab ─────────────────────────────────────────────────────────────────
-function renderIndex() {
-  const basket=priceBasket||FALLBACK;
-  const updated = priceLoadedAt ? new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : 'Estimated baseline';
-  document.getElementById('index-updated').textContent = isLiveData() ? 'Live data · '+updated : 'Estimated baseline · configure API URL in settings to enable live data';
-  const rows=Object.entries(basket).map(([key,item])=>{
-    const stores=['walmart','fredmeyer','winco'];
-    const prices=stores.map(s=>item[s]?.price).filter(Boolean);
-    if (!prices.length) return '';
-    const lo=Math.min(...prices), hi=Math.max(...prices);
-    return `<div class="irow">
-      <div><div class="irow-name">${item.item_name}</div><div class="irow-unit">${item.unit}</div></div>
-      ${stores.map(s=>{
-        if (!item[s]) return `<div class="ip est">—</div>`;
-        const p=item[s].price, cls=p===lo?'lo':p===hi?'hi':'';
-        return `<div class="ip ${cls}">$${p.toFixed(2)}</div>`;
-      }).join('')}
+// ── LISTS ─────────────────────────────────────────────────────────────────────
+function switchListStore(store,btn){
+  activeListStore=store;
+  document.querySelectorAll('.lst-tab').forEach(t=>t.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderListItems();
+}
+function renderListCounts(){
+  STORES.forEach(s=>{
+    const n=lists[s].items.filter(i=>!i.checked).length;
+    const el=document.getElementById('lc-'+s);
+    if(el){el.textContent=n;el.className='lst-count'+(n>0?' show':'');}
+  });
+}
+function isStale(item_key,store){if(!item_key)return false;const obs=getObservedAt(item_key,store);if(!obs)return true;return(Date.now()-new Date(obs).getTime())/86400000>30;}
+function fmtDate(iso){if(!iso)return'—';return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+
+function renderListItems(){
+  const items=lists[activeListStore].items;
+  const wrap=document.getElementById('list-items-inner');
+  const totalsEl=document.getElementById('list-totals');
+  if(!items.length){
+    wrap.innerHTML=`<div class="empty">No items in ${STORE_NAMES[activeListStore]} list.<br><span style="font-size:13px;color:var(--text3)">Add from a verdict, history, or the + button above.</span></div>`;
+    totalsEl.style.display='none';document.getElementById('list-savings-banner').style.display='none';
+    renderListCounts();return;
+  }
+  wrap.innerHTML=items.map((item,idx)=>{
+    const checkClass=item.checked?(item.check_type==='verified'?'verified':'manual'):'';
+    const checkIcon=item.checked?(item.check_type==='verified'?'✓':'·'):'';
+    const staleMarker=isStale(item.item_key,activeListStore)?'<span class="stale-dot"></span>':'';
+    const verifiedRow=item.verified_shelf_price?`<div class="li-verified-label">✓ Verified $${item.verified_shelf_price.toFixed(2)}${item.verified_sale_price?` · member $${item.verified_sale_price.toFixed(2)}`:''}</div>`:'';
+    const priceStr=item.target_price?`$${item.target_price.toFixed(2)}`:'—';
+    return`<div class="li-row${item.checked?' checked':''}" id="li-row-${idx}">
+      <div class="li-check ${checkClass}" onclick="manualCheckItem(${idx})">${checkIcon}</div>
+      <div class="li-content">
+        <div class="li-name">${staleMarker}${item.name}</div>
+        <div class="li-meta">qty ${item.qty||1} · ${item.unit||''} · target ${priceStr}</div>
+        ${verifiedRow}
+      </div>
+      <div class="qty-stepper">
+        <button class="qty-btn" onclick="changeQty(${idx},-1)">−</button>
+        <span class="qty-val">${item.qty||1}</span>
+        <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+      </div>
+      <div class="verify-btn-wrap">
+        <label class="verify-btn${item.check_type==='verified'?' verified':''}">
+          <input type="file" accept="image/*" onchange="handleVerifyPhoto(event,${idx})">
+          📷 ${item.check_type==='verified'?'Re-scan':'Scan'}
+        </label>
+      </div>
+      <button class="li-remove" onclick="removeListItem(${idx})">×</button>
     </div>`;
   }).join('');
-  document.getElementById('index-table').innerHTML=`<div class="irow head"><div>Item</div><div style="text-align:right">Walmart</div><div style="text-align:right">Fred Meyer</div><div style="text-align:right">WinCo</div></div>`+rows;
 
-  // Markup bars
-  const totals={WinCo:0,Walmart:0,'Fred Meyer':0}; let n=0;
-  Object.values(basket).forEach(item=>{
-    const prices=[item.walmart?.price,item.fredmeyer?.price,item.winco?.price].filter(Boolean);
-    if(prices.length<2)return;
-    const med=prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)];
-    if(item.winco?.price)    totals['WinCo']       +=(item.winco.price-med)/med*100;
-    if(item.walmart?.price)  totals['Walmart']     +=(item.walmart.price-med)/med*100;
-    if(item.fredmeyer?.price)totals['Fred Meyer']  +=(item.fredmeyer.price-med)/med*100;
-    n++;
-  });
-  if(n>0) Object.keys(totals).forEach(k=>totals[k]=totals[k]/n);
-  const colors={WinCo:'var(--accent2)',Walmart:'var(--accent)','Fred Meyer':'var(--warn)'};
-  document.getElementById('markup-bars').innerHTML=Object.entries(totals).map(([store,pct])=>`
-    <div class="mrow">
-      <div class="mstore">${store}</div>
-      <div class="markup-bar-wrap" style="flex:1"><div class="mbar-track"><div class="mbar-fill" style="width:${Math.max(2,Math.min(100,(pct+20)/50*100))}%;background:${colors[store]}"></div></div></div>
-      <div class="mpct" style="color:${colors[store]}">${pct>=0?'+':''}${pct.toFixed(0)}%</div>
-    </div>`).join('');
+  totalsEl.style.display='block';
+  const total=items.reduce((s,i)=>s+((i.target_price||0)*(i.qty||1)),0);
+  const remaining=items.filter(i=>!i.checked).length;
+  document.getElementById('lt-total').textContent='$'+total.toFixed(2);
+  document.getElementById('lt-remaining').textContent=remaining;
+  renderSavingsBanner();renderListCounts();
 }
 
-// ── History tab ───────────────────────────────────────────────────────────────
-function renderHistory() {
+function renderSavingsBanner(){
+  const withItems=STORES.filter(s=>lists[s].items.length>0);
+  const banner=document.getElementById('list-savings-banner');
+  if(withItems.length<2){banner.style.display='none';document.getElementById('lt-savings').textContent='—';return;}
+  const storeTotals={};STORES.forEach(s=>{storeTotals[s]=lists[s].items.reduce((sum,i)=>sum+((i.target_price||0)*(i.qty||1)),0);});
+  const allItems=STORES.flatMap(s=>lists[s].items.map(i=>({...i,list_store:s})));
+  const singleCosts={};
+  STORES.forEach(store=>{singleCosts[store]=allItems.reduce((sum,item)=>{const p=item.item_key?getBestPrice(item.item_key,store):item.target_price;return sum+((p||item.target_price||0)*(item.qty||1));},0);});
+  const splitCost=Object.values(storeTotals).reduce((a,b)=>a+b,0);
+  const maxStore=Object.entries(singleCosts).sort((a,b)=>b[1]-a[1])[0];
+  const savings=maxStore[1]-splitCost;
+  if(savings>0.50){
+    banner.style.display='block';
+    document.getElementById('savings-headline').textContent=`Saves ~$${savings.toFixed(2)} vs. buying everything at ${STORE_NAMES[maxStore[0]]}`;
+    document.getElementById('savings-detail').textContent=`${STORE_NAMES[maxStore[0]]} total would be $${maxStore[1].toFixed(2)}`;
+    document.getElementById('lt-savings').textContent=`~$${savings.toFixed(2)}`;
+  }else{banner.style.display='none';document.getElementById('lt-savings').textContent='<$0.50';}
+}
+
+function addToList(store,itemData){
+  const item={id:Date.now()+Math.random(),item_key:itemData.item_key||fuzzyMatchItemKey(itemData.name)||null,name:itemData.name,qty:itemData.qty||1,unit:itemData.unit||'',target_price:itemData.target_price||(itemData.item_key?getBestPrice(itemData.item_key,store):null),store,checked:false,check_type:null,verified_shelf_price:null,verified_sale_price:null,sale_type:null,added_from:itemData.added_from||'manual',added_at:new Date().toISOString()};
+  lists[store].items.push(item);saveLists();renderListCounts();
+}
+function removeListItem(idx){lists[activeListStore].items.splice(idx,1);saveLists();renderListItems();}
+function changeQty(idx,delta){const item=lists[activeListStore].items[idx];item.qty=Math.max(1,(item.qty||1)+delta);saveLists();renderListItems();}
+function manualCheckItem(idx){
+  const item=lists[activeListStore].items[idx];
+  if(item.checked){item.checked=false;item.check_type=null;}
+  else{const ok=confirm(`Skip photo verification for "${item.name}"?\n\nManually checked items won't update price data and are marked unverified.`);if(!ok)return;item.checked=true;item.check_type='manual';}
+  saveLists();renderListItems();
+}
+function clearCheckedItems(){lists[activeListStore].items=lists[activeListStore].items.filter(i=>!i.checked);saveLists();renderListItems();}
+
+async function handleVerifyPhoto(event,idx){
+  const file=event.target.files[0];if(!file)return;
+  const item=lists[activeListStore].items[idx];
+  const base64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+  const row=document.getElementById('li-row-'+idx);if(row)row.style.opacity='.4';
+  try{const result=await callClaudeVerify(item,base64,file.type||'image/jpeg');if(row)row.style.opacity='1';handleVerifyResult(idx,result);}
+  catch(e){if(row)row.style.opacity='1';alert('Scan error: '+e.message);}
+  event.target.value='';
+}
+function handleVerifyResult(idx,result){
+  const item=lists[activeListStore].items[idx];
+  if(!result.match){
+    const proceed=confirm(`⚠️ Item mismatch\n\nExpected: ${item.name}\nFound: ${result.item_found}\n${result.match_reason||''}\n\nPrice will NOT update the baseline. Check off anyway?`);
+    if(proceed){item.checked=true;item.check_type='manual';saveLists();renderListItems();}return;
+  }
+  const shelf=result.shelf_price,sale=result.sale_price,exp=item.target_price;
+  let msg=result.item_found?`✅ ${result.item_found}\n\n`:'';
+  if(shelf&&exp){const diff=shelf-exp;msg+=`Shelf: $${shelf.toFixed(2)} (expected $${exp.toFixed(2)}, ${diff>=0?'+':''}$${diff.toFixed(2)})`;}
+  else if(shelf){msg+=`Shelf price: $${shelf.toFixed(2)}`;}
+  else if(sale){msg+=`Only sale/member price visible: $${sale.toFixed(2)}`;}
+  if(sale){msg+=`\nMember/sale price: $${sale.toFixed(2)}`;if(result.sale_type)msg+=` [${result.sale_type}]`;}
+  if(shelf&&exp&&Math.abs(shelf-exp)>=0.01)msg+=`\n\nUpdate ${STORE_NAMES[activeListStore]} baseline to $${shelf.toFixed(2)}?`;
+  const doUpdate=confirm(msg+(shelf&&exp&&Math.abs(shelf-exp)>=0.01?'\n\nOK = update, Cancel = skip update':''));
+  item.checked=true;item.check_type='verified';
+  if(shelf){item.verified_shelf_price=shelf;item.target_price=shelf;}
+  if(sale)item.verified_sale_price=sale;
+  if(result.sale_type)item.sale_type=result.sale_type;
+  if(shelf){
+    const obs={item_key:item.item_key,item_name:item.name,store:activeListStore,shelf_price:shelf,sale_price:sale||null,sale_type:result.sale_type||null,observed_at:new Date().toISOString().split('T')[0],source:'list_verify',confidence:result.confidence||'high'};
+    pendingObs.push(obs);savePendingObs();
+    if(doUpdate&&item.item_key&&priceBasket&&priceBasket[item.item_key]){if(!priceBasket[item.item_key][activeListStore])priceBasket[item.item_key][activeListStore]={};priceBasket[item.item_key][activeListStore].price=shelf;priceBasket[item.item_key][activeListStore].observed_at=obs.observed_at;}
+  }
+  saveLists();renderListItems();
+}
+
+function quickAddToList(prefix,store){
+  const lv=lastVerdicts[prefix];if(!lv)return;
+  const item_key=fuzzyMatchItemKey(lv.item);
+  const target_price=item_key?getBestPrice(item_key,store):parseFloat(lv.price)||null;
+  addToList(store,{name:lv.item,unit:lv.unit,item_key,target_price,added_from:'verdict'});
+  const btn=event.target;const orig=btn.textContent;btn.textContent='✓ Added';btn.className='atl-btn added';
+  setTimeout(()=>{btn.textContent=orig;btn.className=btn===document.querySelector('.atl-btn.pri')?'atl-btn pri':'atl-btn sec';},1800);
+  showToast(`Added to ${STORE_NAMES[store]} list`);
+}
+
+function openAddItemModal(prefill){
+  document.getElementById('add-item-modal').classList.add('open');
+  if(prefill){document.getElementById('modal-item-name').value=prefill.name||'';document.getElementById('modal-item-price').value=prefill.price||'';document.getElementById('modal-item-unit').value=prefill.unit||'';}
+  setTimeout(()=>document.getElementById('modal-item-name').focus(),100);
+}
+function closeAddItemModal(e){if(e&&e.target!==document.getElementById('add-item-modal'))return;document.getElementById('add-item-modal').classList.remove('open');document.getElementById('modal-item-name').value='';document.getElementById('modal-item-price').value='';document.getElementById('modal-item-unit').value='';document.getElementById('modal-price-hint').textContent='';}
+function onModalNameInput(){const key=fuzzyMatchItemKey(document.getElementById('modal-item-name').value);const p=key?getBestPrice(key,modalStore):null;document.getElementById('modal-price-hint').textContent=p?`💡 ${STORE_NAMES[modalStore]} baseline: $${p.toFixed(2)}`:'';if(p&&!document.getElementById('modal-item-price').value)document.getElementById('modal-item-price').value=p.toFixed(2);}
+function modalSelectStore(btn,store){modalStore=store;document.querySelectorAll('#modal-store-sel .store-sel-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');onModalNameInput();}
+function confirmAddItem(){
+  const name=document.getElementById('modal-item-name').value.trim();
+  const price=parseFloat(document.getElementById('modal-item-price').value);
+  const unit=document.getElementById('modal-item-unit').value.trim();
+  if(!name){alert('Enter an item name.');return;}
+  addToList(modalStore,{name,target_price:isNaN(price)?null:price,unit,added_from:'manual'});
+  closeAddItemModal();activeListStore=modalStore;
+  document.querySelectorAll('.lst-tab').forEach((t,i)=>t.classList.toggle('active',STORES[i]===modalStore));
+  if(document.getElementById('tab-lists').classList.contains('active'))renderListItems();
+  showToast(`Added to ${STORE_NAMES[modalStore]} list`);
+}
+
+function showHistoryStorePicker(idx,el){
+  pickerHistoryIdx=idx;const picker=document.getElementById('store-picker-global');picker.style.display='block';picker.classList.add('open');
+  const rect=el.getBoundingClientRect();picker.style.top=(rect.bottom+window.scrollY+4)+'px';picker.style.left=Math.min(rect.left,window.innerWidth-160)+'px';
+  setTimeout(()=>document.addEventListener('click',dismissPicker,{once:true}),10);
+}
+function dismissPicker(){const p=document.getElementById('store-picker-global');p.style.display='none';p.classList.remove('open');}
+function historyAddToStore(store){if(pickerHistoryIdx===null)return;const h=history[pickerHistoryIdx];addToList(store,{name:h.item,unit:h.unit,target_price:parseFloat(h.price)||null,added_from:'history'});dismissPicker();showToast(`Added to ${STORE_NAMES[store]} list`);}
+function startAuditFromList(){showToast('Audit mode — coming in next update');}
+
+function showToast(msg){let t=document.getElementById('pc-toast');if(!t){t=document.createElement('div');t.id='pc-toast';t.style.opacity='0';document.body.appendChild(t);}t.textContent=msg;t.style.opacity='1';clearTimeout(t._timer);t._timer=setTimeout(()=>t.style.opacity='0',2200);}
+
+// ── Index ─────────────────────────────────────────────────────────────────────
+function renderIndex(){
+  const basket=priceBasket||FALLBACK;
+  const updated=priceLoadedAt?new Date(priceLoadedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'Estimated baseline';
+  document.getElementById('index-updated').textContent=isLiveData()?'Live data · '+updated:'Estimated baseline';
+  const stores=['walmart','fredmeyer','winco'];
+  const rows=Object.entries(basket).map(([key,item])=>{
+    const prices=stores.map(s=>item[s]?.price).filter(Boolean);if(!prices.length)return'';
+    const lo=Math.min(...prices),hi=Math.max(...prices);
+    return`<div class="irow"><div><div class="irow-name">${item.item_name}</div><div class="irow-unit">${item.unit}</div></div>${stores.map(s=>{if(!item[s])return`<div class="ip est">—</div>`;const p=item[s].price,cls=p===lo?'lo':p===hi?'hi':'';return`<div class="ip ${cls}">$${p.toFixed(2)}</div>`;}).join('')}</div>`;
+  }).join('');
+  document.getElementById('index-table').innerHTML=`<div class="irow head"><div>Item</div><div style="text-align:right">Walmart</div><div style="text-align:right">Fred Meyer</div><div style="text-align:right">WinCo</div></div>`+rows;
+  const totals={WinCo:0,Walmart:0,'Fred Meyer':0};let n=0;
+  Object.values(basket).forEach(item=>{const prices=[item.walmart?.price,item.fredmeyer?.price,item.winco?.price].filter(Boolean);if(prices.length<2)return;const med=prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)];if(item.winco?.price)totals['WinCo']+=(item.winco.price-med)/med*100;if(item.walmart?.price)totals['Walmart']+=(item.walmart.price-med)/med*100;if(item.fredmeyer?.price)totals['Fred Meyer']+=(item.fredmeyer.price-med)/med*100;n++;});
+  if(n>0)Object.keys(totals).forEach(k=>totals[k]=totals[k]/n);
+  const colors={WinCo:'#34C759',Walmart:'#2E7D32','Fred Meyer':'#FF9500'};
+  document.getElementById('markup-bars').innerHTML=Object.entries(totals).map(([store,pct])=>`<div class="mrow"><div class="mstore">${store}</div><div class="mbar-track"><div class="mbar-fill" style="width:${Math.max(2,Math.min(100,(pct+20)/50*100))}%;background:${colors[store]}"></div></div><div class="mpct" style="color:${colors[store]}">${pct>=0?'+':''}${pct.toFixed(0)}%</div></div>`).join('');
+}
+
+// ── History ───────────────────────────────────────────────────────────────────
+function renderHistory(){
   const list=document.getElementById('history-list');
   if(!history.length){list.innerHTML='<div class="empty">No checks yet.</div>';return;}
-  list.innerHTML=history.map(h=>`
-    <div class="hrow">
-      <div class="hdot ${h.verdict_class}"></div>
-      <div class="hitem">${h.item}</div>
-      <div class="hmeta">${h.store} · ${h.unit} · ${h.date}</div>
-      <span class="hsrc">${h.source}</span>
-      <div class="hprice">$${parseFloat(h.price).toFixed(2)}</div>
-    </div>`).join('');
+  list.innerHTML=history.map((h,idx)=>`<div class="hrow"><div class="h-dot ${h.verdict_class}"></div><div style="flex:1"><div class="h-item">${h.item}</div><div class="h-meta">${h.store} · ${h.unit} · ${h.date}</div></div><span class="h-src">${h.source}</span><div class="h-price">$${parseFloat(h.price).toFixed(2)}</div><button class="h-add" onclick="showHistoryStorePicker(${idx},this)" title="Add to list">+</button></div>`).join('');
 }
 function clearHistory(){if(confirm('Clear all history?')){history=[];try{localStorage.removeItem('pc_history_v3');}catch(e){}renderHistory();}}
 
-// ── Tab switching ──────────────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────────────────
 function switchTab(t,btn){
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  document.getElementById('tab-'+t).classList.add('active');
-  if(t==='index')renderIndex();
-  if(t==='history')renderHistory();
-  if(t!=='barcode')stopScanner();
+  if(btn)btn.classList.add('active');document.getElementById('tab-'+t).classList.add('active');
+  if(t==='index')renderIndex();if(t==='history')renderHistory();if(t==='lists')renderListItems();if(t!=='barcode')stopScanner();
 }
 function setUnit(el,u){
-  document.querySelectorAll('.unit-chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active'); selectedUnit=u;
+  document.querySelectorAll('.uchip').forEach(c=>c.classList.remove('active'));el.classList.add('active');selectedUnit=u;
   if(u==='custom'){const c=prompt('Unit:');if(c){selectedUnit=c;el.textContent=c;}}
 }
 
-// ── Init ───────────────────────────────────────────────────────────────────────
-loadPriceData().then(()=>{ if(document.getElementById('tab-index').classList.contains('active'))renderIndex(); });
-renderHistory();
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadPriceData().then(()=>{if(document.getElementById('tab-index').classList.contains('active'))renderIndex();renderListCounts();});
+renderHistory();renderListCounts();
 </script>
 </body>
 </html>
