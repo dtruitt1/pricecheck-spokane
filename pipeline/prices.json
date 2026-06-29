@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-22T09:05:13.302Z",
+  "updated_at": "2026-06-29T08:41:24.695Z",
   "prices": [
     {
       "item_key": "bananas_lb",
@@ -8,7 +8,7 @@
       "price": 0.55,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -18,7 +18,7 @@
       "price": 0.79,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -28,7 +28,7 @@
       "price": 0.5,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -38,7 +38,7 @@
       "price": 0.39,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -48,7 +48,7 @@
       "price": 2.49,
       "unit": "loaf",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -58,7 +58,7 @@
       "price": 2.69,
       "unit": "loaf",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -68,7 +68,7 @@
       "price": 1.48,
       "unit": "loaf",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -78,7 +78,7 @@
       "price": 1.98,
       "unit": "loaf",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -88,7 +88,7 @@
       "price": 3.19,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -98,7 +98,7 @@
       "price": 4.79,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -108,7 +108,7 @@
       "price": 2.85,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -118,7 +118,7 @@
       "price": 3.98,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -128,7 +128,7 @@
       "price": 4.29,
       "unit": "48 oz",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -138,7 +138,7 @@
       "price": 5.99,
       "unit": "48 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -148,7 +148,7 @@
       "price": 3.76,
       "unit": "48 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -158,7 +158,7 @@
       "price": 4.28,
       "unit": "48 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -168,7 +168,7 @@
       "price": 2.33,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -178,7 +178,7 @@
       "price": 3.99,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -188,7 +188,7 @@
       "price": 3.58,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -198,17 +198,17 @@
       "price": 4.28,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
       "item_key": "chicken_breast_lb",
       "item_name": "Boneless chicken breast",
       "store": "fredmeyer",
-      "price": 2.89,
+      "price": 1.99,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -218,7 +218,7 @@
       "price": 5.49,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -228,7 +228,7 @@
       "price": 2.57,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -238,7 +238,7 @@
       "price": 2.78,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -248,7 +248,7 @@
       "price": 1.59,
       "unit": "doz",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -258,7 +258,7 @@
       "price": 1.79,
       "unit": "doz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -268,7 +268,7 @@
       "price": 2.46,
       "unit": "doz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -278,7 +278,7 @@
       "price": 5.48,
       "unit": "doz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -288,7 +288,7 @@
       "price": 8.99,
       "unit": "lb",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -298,7 +298,7 @@
       "price": 6.99,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -308,7 +308,7 @@
       "price": 7.43,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -318,17 +318,17 @@
       "price": 4.48,
       "unit": "lb",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
       "item_key": "milk_whole_gallon",
       "item_name": "Whole milk",
       "store": "fredmeyer",
-      "price": 2.59,
+      "price": 2.49,
       "unit": "gal",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -338,7 +338,7 @@
       "price": 3.19,
       "unit": "gal",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -348,7 +348,7 @@
       "price": 3.64,
       "unit": "gal",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -358,17 +358,17 @@
       "price": 3.18,
       "unit": "gal",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
       "item_key": "orange_juice_52oz",
       "item_name": "Orange juice",
       "store": "fredmeyer",
-      "price": 1.67,
+      "price": 4.69,
       "unit": "52 oz",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -378,7 +378,7 @@
       "price": 4.69,
       "unit": "52 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -388,7 +388,7 @@
       "price": 4.46,
       "unit": "52 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -398,7 +398,7 @@
       "price": 3.98,
       "unit": "52 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -408,7 +408,7 @@
       "price": 14.99,
       "unit": "6-ct",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -418,7 +418,7 @@
       "price": 8.99,
       "unit": "6-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -428,7 +428,7 @@
       "price": 12.96,
       "unit": "6-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -438,7 +438,7 @@
       "price": 7.98,
       "unit": "6-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -448,7 +448,7 @@
       "price": 1.69,
       "unit": "16 oz",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -458,7 +458,7 @@
       "price": 1.99,
       "unit": "16 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -468,7 +468,7 @@
       "price": 0.98,
       "unit": "16 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -478,17 +478,17 @@
       "price": 0.98,
       "unit": "16 oz",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
       "item_key": "potatoes_russet_5lb",
       "item_name": "Russet potatoes",
       "store": "fredmeyer",
-      "price": 0.99,
+      "price": 2.69,
       "unit": "5 lb bag",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -498,7 +498,7 @@
       "price": 2.99,
       "unit": "5 lb bag",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -508,7 +508,7 @@
       "price": 2.14,
       "unit": "5 lb bag",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -518,7 +518,7 @@
       "price": 3.48,
       "unit": "5 lb bag",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -528,7 +528,7 @@
       "price": 6.79,
       "unit": "12-ct",
       "source": "walmart_api",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -538,7 +538,7 @@
       "price": 5.99,
       "unit": "12-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -548,7 +548,7 @@
       "price": 9.98,
       "unit": "12-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     },
     {
@@ -558,7 +558,7 @@
       "price": 8.98,
       "unit": "12-ct",
       "source": "manual",
-      "observed_at": "2026-06-22",
+      "observed_at": "2026-06-29",
       "ad_end_date": null
     }
   ]
